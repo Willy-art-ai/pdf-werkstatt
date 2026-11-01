@@ -34,3 +34,12 @@ Firefox bleibt dabei dein normaler Browser.
 
 Updates: Neue Version von index.html einfach im GitHub-Repository erneut
 hochladen („Add file“ > „Upload files“). Die App holt sie beim nächsten Start.
+
+UPDATE November 2026 (Texterkennung, löschbare Kommentare, Textmarker)
+---------------------------------------------------------------------
+Im Repository „Add file“ > „Upload files“ und hineinziehen:
+  - index.html und sw.js (ersetzen die alten Dateien)
+  - den kompletten Ordner „ocr“ (als Ordner hineinziehen – er muss
+    im Repository als Unterordner „ocr“ erscheinen)
+Dann „Commit changes“. Die App holt das Update beim nächsten Start
+(ggf. App einmal schließen und neu öffnen).
