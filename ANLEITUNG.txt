@@ -1,0 +1,36 @@
+PDF-Werkstatt als Standard-App für PDFs (Microsoft Edge)
+=======================================================
+
+A) Einmalig online stellen (kostenlos mit GitHub Pages, ca. 10 Minuten)
+ 1. Auf https://github.com ein kostenloses Konto anlegen und anmelden.
+ 2. Oben rechts auf „+“ > „New repository“.
+    Name: pdf-werkstatt  ·  „Public“ auswählen  ·  „Create repository“.
+ 3. Auf der neuen Seite den Link „uploading an existing file“ anklicken.
+ 4. ALLE Dateien aus diesem Ordner hineinziehen (index.html, manifest.webmanifest,
+    sw.js und die drei PNG-Symbole). Unten auf „Commit changes“ klicken.
+ 5. Oben auf „Settings“ > links „Pages“.
+    Bei „Branch“: „main“ und „/ (root)“ wählen > „Save“.
+ 6. 1–2 Minuten warten. Die Adresse lautet dann:
+    https://DEIN-BENUTZERNAME.github.io/pdf-werkstatt/
+
+   Hinweis: Hochgeladen wird nur das Programm selbst. Deine PDFs werden
+   nie hochgeladen – sie werden ausschließlich auf deinem PC verarbeitet.
+
+B) In Edge installieren
+ 7. Die Adresse aus Schritt 6 in Microsoft Edge öffnen.
+ 8. Rechts in der Adressleiste auf das App-Symbol („App verfügbar. PDF-Werkstatt
+    installieren“) klicken – oder Menü „…“ > „Apps“ > „PDF-Werkstatt installieren“.
+ 9. „Installieren“ bestätigen. Die App erscheint im Startmenü.
+
+C) Als Standard-App für PDFs festlegen (Windows 10/11)
+10. Rechtsklick auf irgendeine PDF > „Öffnen mit“ > „Andere App auswählen“.
+11. „PDF-Werkstatt“ wählen und „Immer“ klicken.
+    (Alternativ: Einstellungen > Apps > Standard-Apps > „.pdf“ eingeben.)
+12. Beim ersten Öffnen fragt Edge eventuell, ob die App PDF-Dateien öffnen darf –
+    mit „Zulassen“ bestätigen und „Nicht erneut fragen“ anhaken.
+
+Fertig: Doppelklick auf eine PDF öffnet sie direkt in der PDF-Werkstatt.
+Firefox bleibt dabei dein normaler Browser.
+
+Updates: Neue Version von index.html einfach im GitHub-Repository erneut
+hochladen („Add file“ > „Upload files“). Die App holt sie beim nächsten Start.
