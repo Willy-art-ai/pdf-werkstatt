@@ -194,6 +194,10 @@ body.t-select .obj{pointer-events:auto;cursor:move}
 .obj.t-highlight,.obj.t-hl{mix-blend-mode:multiply}
 .obj.t-annot{border:1px dashed transparent}
 body.t-select .obj.t-annot:hover{border-color:rgba(47,91,211,.6);background:rgba(47,91,211,.06)}
+body.single .page{display:none}
+body.single .page.curpg{display:block}
+body.single #pages{min-height:100%}
+.hb.on{background:#2c3550;color:#fff;box-shadow:inset 0 0 0 1px #4b5878}
 #busyx{margin-left:12px;border:1px solid #556;background:transparent;color:#fff;border-radius:6px;padding:3px 10px;cursor:pointer}
 .obj.t-redact{background:#000;box-shadow:0 0 0 2px #e53935}
 .obj.t-field{background:rgba(47,91,211,.08);border:1px dashed var(--acc);font-size:10px;color:var(--acc);overflow:hidden;padding:1px 3px;white-space:nowrap}
@@ -274,6 +278,7 @@ mark{background:#ffe08a;padding:0 1px}
 <div id="app">
 <header>
   <div class="brand"><b>PW</b><span>PDF-Werkstatt</span></div>
+  <button class="hb" id="bNew" title="Neue PDF erstellen (Strg+N)"><span data-i="blank"></span><span class="lbl">Neu</span></button>
   <button class="hb" id="bOpen" title="Öffnen (Strg+O)"><span data-i="open"></span><span class="lbl">Öffnen</span></button>
   <button class="hb" id="bAdd" title="Weitere PDFs/Bilder anhängen (zusammenführen)"><span data-i="merge"></span><span class="lbl">Zusammenführen</span></button>
   <button class="hb primary" id="bSave" title="Speichern (Strg+S)"><span data-i="save"></span><span class="lbl">Speichern</span></button>
@@ -285,7 +290,10 @@ mark{background:#ffe08a;padding:0 1px}
   <span id="fname"></span>
   <div class="grow"></div>
   <button class="hb" id="bLeft" title="Seitenleiste"><span data-i="sidebar"></span></button>
-  <input class="pgin" id="pgin" value="0" title="Seite"><span style="color:#9aa5bf" id="pgcount">/ 0</span>
+  <button class="hb" id="bPrev" title="Vorherige Seite (← oder Bild ↑)"><span data-i="up"></span></button>
+  <input class="pgin" id="pgin" value="0" title="Seite – Zahl eingeben oder mit ↑/↓ blättern"><span style="color:#9aa5bf" id="pgcount">/ 0</span>
+  <button class="hb" id="bNext" title="Nächste Seite (→ oder Bild ↓)"><span data-i="down"></span></button>
+  <button class="hb" id="bSingle" title="Einzelseiten-Ansicht: immer nur eine Seite anzeigen"><span data-i="single"></span></button>
   <div class="sep"></div>
   <button class="hb" id="bZo" title="Verkleinern"><span data-i="minus"></span></button>
   <select class="zoomsel" id="zoomsel">
@@ -356,7 +364,7 @@ const ICONS = {
   redact:'M3 6h18v4H3zM3 14h12v4H3z', info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.01', imgexp:'M4 5h16v14H4zM8 15l3-3 2 2 3-3 3 3M12 2v3',
   textexp:'M6 3h9l4 4v14H6zM9 12h6M9 16h6M9 8h3', compress:'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7', clean:'M4 4h16v16H4zM8 8l8 8M16 8l-8 8',
   filebig:'M6 3h9l4 4v14H6zM15 3v4h4M9 13h6M9 17h6', copy:'M8 8h12v12H8zM4 16V4h12', front:'M4 4h10v10H4zM10 10h10v10H10z', reverse:'M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4',
-  x:'M6 6l12 12M18 6L6 18', ocr:'M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 9h8M8 12h8M8 15h5', mail:'M3 6h18v12H3zM3 7l9 6 9-6', bookmark:'M6 3h12v18l-6-4-6 4z', bmadd:'M6 3h9M6 3v18l6-4 6 4v-7M18 3v6M15 6h6', bmchild:'M4 5h8M8 5v11h12M16 12l4 4-4 4', up:'M12 19V5M6 11l6-6 6 6', down:'M12 5v14M6 13l6 6 6-6', left:'M19 12H5M11 6l-6 6 6 6', right:'M5 12h14M13 6l6 6-6 6', pencil:'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', lock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4M12 15v2', reset:'M4 4v6h6M4 10a8 8 0 1 1 2 6'
+  x:'M6 6l12 12M18 6L6 18', single:'M7 3h10v18H7z', ocr:'M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 9h8M8 12h8M8 15h5', mail:'M3 6h18v12H3zM3 7l9 6 9-6', bookmark:'M6 3h12v18l-6-4-6 4z', bmadd:'M6 3h9M6 3v18l6-4 6 4v-7M18 3v6M15 6h6', bmchild:'M4 5h8M8 5v11h12M16 12l4 4-4 4', up:'M12 19V5M6 11l6-6 6 6', down:'M12 5v14M6 13l6 6 6-6', left:'M19 12H5M11 6l-6 6 6 6', right:'M5 12h14M13 6l6 6-6 6', pencil:'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', lock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4M12 15v2', reset:'M4 4v6h6M4 10a8 8 0 1 1 2 6'
 };
 const icon = (n, size) => `<svg class="i" viewBox="0 0 24 24" ${size ? `style="width:${size}px;height:${size}px"` : ''}><path d="${ICONS[n] || ''}"/></svg>`;
 function paintIcons(root = document) { $$('[data-i]', root).forEach(e => { if (!e.firstChild) e.innerHTML = icon(e.dataset.i, e.dataset.i === 'filebig' ? 44 : 0); }); }
@@ -773,21 +781,24 @@ function rebuildAll() {
   if (S.cur >= S.pages.length) S.cur = Math.max(0, S.pages.length - 1);
   S.scale = computeScale();
   for (const id of [...S.selPages]) if (!pageById(id)) S.selPages.delete(id);
-  buildPages(); buildThumbs(); renderBookmarks();
+  buildPages(); buildThumbs(); renderBookmarks(); markCurPage();
   $('#fname').textContent = has ? S.fileName : '';
   $('#pgcount').textContent = '/ ' + S.pages.length; $('#pgin').value = has ? S.cur + 1 : 0;
   renderPanel(); updUndo();
 }
 function refreshPage(p) { renderObjs(p); }
-function scrollToPage(i, instant) { const p = S.pages[i]; if (!p) return; const el = pageEls.get(p.id); if (!el) return; $('#viewer').scrollTo({ top: el.offsetTop - 14, behavior: instant ? 'auto' : 'smooth' }); setCur(i); }
-function setCur(i) {
-  if (i === S.cur && $('#pgin').value == i + 1) return; S.cur = i; $('#pgin').value = i + 1;
+function scrollToPage(i, instant) { const p = S.pages[i]; if (!p) return; const el = pageEls.get(p.id); if (!el) return; if (S.single) { setCur(i, true); if (typeof S.zoomMode === 'string') { const ns = computeScale(); if (Math.abs(ns - S.scale) > 0.001) { S.scale = ns; layoutPages(); } } $('#viewer').scrollTop = 0; return; } $('#viewer').scrollTo({ top: el.offsetTop - 14, behavior: instant ? 'auto' : 'smooth' }); setCur(i); }
+function goPage(d) { if (!S.pages.length) return; if (S.organize) toggleOrganize(false); const n = Math.max(0, Math.min(S.pages.length - 1, d === 'first' ? 0 : d === 'last' ? S.pages.length - 1 : S.cur + d)); scrollToPage(n, true); }
+function markCurPage() { S.pages.forEach((p, k) => pageEls.get(p.id)?.classList.toggle('curpg', k === S.cur)); $('#bPrev').disabled = S.cur <= 0; $('#bNext').disabled = S.cur >= S.pages.length - 1; }
+function toggleSingle(on = !S.single) { S.single = on; document.body.classList.toggle('single', on); $('#bSingle').classList.toggle('on', on); try { localStorage.setItem('pw_single', on ? '1' : '0'); } catch { } markCurPage(); const i = S.cur; setTimeout(() => scrollToPage(i, true), 0); toast(on ? 'Einzelseiten-Ansicht: mit ▲ ▼, ← → oder Bild ↑/↓ blättern' : 'Fortlaufende Ansicht'); }
+function setCur(i, force) {
+  if (i === S.cur && $('#pgin').value == i + 1 && !force) return; S.cur = i; $('#pgin').value = i + 1; markCurPage();
   $$('#thumbs .thumb').forEach((t, k) => t.classList.toggle('cur', k === i));
   const t = $$('#thumbs .thumb')[i]; if (t) { const c = $('#thumbs'); if (t.offsetTop < c.scrollTop || t.offsetTop + t.offsetHeight > c.scrollTop + c.clientHeight) c.scrollTop = t.offsetTop - 40; }
   if (S.rtab === 'doc') renderPanel();
 }
 function onScroll() {
-  if (S.organize) return; const v = $('#viewer'); const mid = v.scrollTop + v.clientHeight * 0.35; let best = 0;
+  if (S.organize || S.single) return; const v = $('#viewer'); const mid = v.scrollTop + v.clientHeight * 0.35; let best = 0;
   S.pages.forEach((p, i) => { const el = pageEls.get(p.id); if (el && el.offsetTop <= mid) best = i; });
   setCur(best);
 }
@@ -2142,9 +2153,35 @@ function panelDoc(b) {
     ${m.strip ? '<div class="hint">Metadaten werden beim Speichern entfernt.</div>' : ''}
     <div class="hint"><b>${S.pages.length}</b> Seiten · Quelldateien: ${srcs.map(s => esc(s.name) + ' (' + fmtSize(s.bytes.length) + ')').join(', ') || '–'}${V ? `<br>Aktuelle Seite ${S.cur + 1}: ${Math.round(V.width / 72 * 25.4)} × ${Math.round(V.height / 72 * 25.4)} mm${p.crop ? ' (zugeschnitten)' : ''}` : ''}</div>
     ${p?.crop ? `<button class="btn sm" id="uncrop">${icon('crop', 15)}Zuschnitt dieser Seite entfernen</button>` : ''}
-    <div class="hint" style="margin-top:12px"><b>Tastenkürzel</b><br>Strg+O öffnen · Strg+S speichern · Strg+Z/Y rückgängig/wiederholen · Strg+F suchen · Strg+B Lesezeichen · Entf löschen · Pfeiltasten verschieben · V Auswahl · T Text · Strg+Mausrad zoomen</div>`;
+    <div class="hint" style="margin-top:12px"><b>Tastenkürzel</b><br>Strg+N neu · Strg+O öffnen · ← → / Bild ↑↓ blättern · Pos1/Ende erste/letzte Seite · Strg+S speichern · Strg+Z/Y rückgängig/wiederholen · Strg+F suchen · Strg+B Lesezeichen · Entf löschen · Pfeiltasten verschieben · V Auswahl · T Text · Strg+Mausrad zoomen</div>`;
   $$('[data-m]', b).forEach(i => { i.addEventListener('focus', () => pushUndo(), { once: true }); i.addEventListener('input', () => { const k = i.dataset.m; if (k === 'fileName') { S.fileName = i.value.trim() || 'Dokument.pdf'; $('#fname').textContent = S.fileName; } else { S.meta[k] = i.value; S.meta.strip = false; } }); });
   $('#uncrop', b) && ($('#uncrop', b).onclick = () => { pushUndo(); p.crop = null; rebuildAll(); });
+}
+
+/* ================= Neues Dokument ================= */
+const PAPER = { a4: ['A4', 595.28, 841.89], a5: ['A5', 419.53, 595.28], a3: ['A3', 841.89, 1190.55], letter: ['US Letter', 612, 792] };
+function createBlankDoc(fmt = 'a4', orient = 'hoch', n = 1) {
+  const [, w0, h0] = PAPER[fmt] || PAPER.a4; const [w, h] = orient === 'quer' ? [h0, w0] : [w0, h0];
+  commitEditor(); if (S.organize) toggleOrganize(false);
+  S.pages = Array.from({ length: Math.max(1, Math.min(500, n)) }, () => makeBlank(w, h));
+  S.fileName = 'Neues Dokument.pdf'; S.meta = { title: '', author: '', subject: '', keywords: '', strip: false }; S.outline = []; S.bmSel = null;
+  S.undo = []; S.redo = []; S.hits = []; S.sel = null; S.selPages.clear(); S.cur = 0; S.zoomMode = 'page';
+  rebuildAll(); setTimeout(() => scrollToPage(0, true), 30); toast('Neue PDF erstellt – füge Text, Bilder oder Seiten aus anderen Dateien hinzu');
+}
+const canNewWindow = () => { try { return window.top === window && !/claude\.ai|claudeusercontent/.test(location.host); } catch { return false; } };
+async function newDocDialog() {
+  const dirty = S.pages.length && (S.undo.length > 0);
+  const nw = canNewWindow() && S.pages.length;
+  const r = await dialog('Neue PDF erstellen', `
+    <div class="frow"><div class="fld"><label>Format</label><select name="fmt">${Object.entries(PAPER).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join('')}</select></div>
+    <div class="fld"><label>Ausrichtung</label><select name="orient"><option value="hoch">Hochformat</option><option value="quer">Querformat</option></select></div>
+    <div class="fld" style="max-width:90px"><label>Seiten</label><input type="number" name="n" value="1" min="1" max="500"></div></div>
+    <div class="hint">Tipp: Über „Seiten organisieren“ → „Aus Datei“ kannst du danach Seiten aus anderen PDFs oder Bilder einfügen.</div>
+    ${S.pages.length ? `<div class="hint">${nw ? 'Mit „Neues Fenster“ bleibt dein aktuelles Dokument „' + esc(S.fileName) + '“ geöffnet.' : ''}${dirty ? `${nw ? '<br>' : ''}<b>Achtung:</b> „Hier erstellen“ schließt „${esc(S.fileName)}“ – nicht gespeicherte Änderungen gehen verloren.` : ''}</div>` : ''}`,
+    [{ label: 'Abbrechen', value: null }, ...(nw ? [{ label: 'Neues Fenster', value: 'win' }] : []), { label: S.pages.length ? 'Hier erstellen' : 'Erstellen', value: 'here', pri: !nw }].concat(nw ? [] : []).map((b, i, a) => nw && b.value === 'win' ? { ...b, pri: true } : b));
+  if (!r) return; const v = r.vals; const n = Math.max(1, Math.min(500, +v.n || 1));
+  if (r.v === 'win') { const w = window.open(location.href.split('#')[0] + `#neu-${v.fmt}-${v.orient}-${n}`, '_blank'); if (!w) { toast('Neues Fenster wurde blockiert – Dokument wird hier erstellt'); createBlankDoc(v.fmt, v.orient, n); } return; }
+  createBlankDoc(v.fmt, v.orient, n);
 }
 
 /* ================= Wiring ================= */
@@ -2153,7 +2190,7 @@ function wire() {
   $('#bOpen').onclick = () => $('#fileOpen').click(); $('#eOpen').onclick = () => $('#fileOpen').click();
   $('#bAdd').onclick = () => $('#fileAdd').click();
   $('#eImg').onclick = () => runAction('imgs2pdf');
-  $('#eBlank').onclick = () => { pushUndo(); S.pages = [makeBlank()]; S.fileName = 'Neues Dokument.pdf'; rebuildAll(); };
+  $('#eBlank').onclick = newDocDialog;
   $('#fileOpen').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if (!f.length) return; S.sources.clear(); thumbCache.clear(); importFiles(f, 0, true); };
   $('#fileAdd').onchange = e => { const f = [...e.target.files]; e.target.value = ''; importFiles(f, S.pages.length); };
   $('#fileInsert').onchange = e => { const f = [...e.target.files]; e.target.value = ''; importFiles(f, S.pages.length ? S.cur + 1 : 0); };
@@ -2163,6 +2200,10 @@ function wire() {
   $('#bUndo').onclick = undo; $('#bRedo').onclick = redo;
   $('#bZi').onclick = () => zoomStep(1); $('#bZo').onclick = () => zoomStep(-1);
   $('#zoomsel').onchange = e => { const v = e.target.value; if (v !== 'custom') setZoom(isNaN(+v) ? v : +v); };
+  $('#bPrev').onclick = () => goPage(-1); $('#bNext').onclick = () => goPage(1); $('#bSingle').onclick = () => toggleSingle();
+  $('#pgin').addEventListener('keydown', e => { if (e.key === 'ArrowUp') { e.preventDefault(); goPage(-1); } if (e.key === 'ArrowDown') { e.preventDefault(); goPage(1); } if (e.key === 'Enter') e.target.blur(); });
+  $('#pgin').addEventListener('focus', e => e.target.select());
+  $('#bNew').onclick = newDocDialog;
   $('#pgin').onchange = e => { const n = +e.target.value; if (n >= 1 && n <= S.pages.length) scrollToPage(n - 1); else e.target.value = S.cur + 1; };
   $('#bSearch').onclick = () => runAction('search');
   $('#bRight').onclick = () => { const m = $('#main'); if (innerWidth <= 900) m.classList.toggle('showright'); else m.classList.toggle('noright'); };
@@ -2182,6 +2223,7 @@ function wire() {
   let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (typeof S.zoomMode === 'string' && S.pages.length) setZoom(S.zoomMode); }, 150); });
   addEventListener('keydown', onKey);
   wireBookmarks(); renderBookmarks();
+  try { if (localStorage.getItem('pw_single') === '1') { S.single = true; document.body.classList.add('single'); $('#bSingle').classList.add('on'); } } catch { }
   $('#busyx').onclick = () => { ocrCancel = true; $('#busyt').textContent = 'Wird nach der aktuellen Seite abgebrochen …'; };
   try { S.flattenComments = localStorage.getItem('pw_flatten') === '1'; } catch { }
   buildRibbon(); renderPanel(); updUndo();
@@ -2192,6 +2234,7 @@ function onKey(e) {
   const mod = e.ctrlKey || e.metaKey; const k = e.key.toLowerCase();
   if (mod && k === 's') { e.preventDefault(); savePdf(); return; }
   if (mod && k === 'o') { e.preventDefault(); $('#fileOpen').click(); return; }
+  if (mod && k === 'n' && !e.shiftKey) { e.preventDefault(); newDocDialog(); return; }
   if (mod && k === 'f') { e.preventDefault(); runAction('search'); return; }
   if (mod && k === 'b' && S.pages.length) { e.preventDefault(); showLeft('bm'); bmAdd(false); return; }
   if (typing) return;
@@ -2210,13 +2253,18 @@ function onKey(e) {
   }
   if (k === 'escape') { if (S.tool !== 'select') setTool('select'); else select(null); return; }
   if (!mod && S.pages.length) { const map = { v: 'select', t: 'text', h: 'highlight', n: 'note', d: 'ink', r: 'rect' }; if (map[k]) setTool(map[k]); }
-  if (!o && (k === 'pagedown' || k === 'pageup') && S.pages.length) { e.preventDefault(); scrollToPage(Math.max(0, Math.min(S.pages.length - 1, S.cur + (k === 'pagedown' ? 1 : -1)))); }
+  if (!o && S.pages.length) {
+    if (k === 'pagedown' || k === 'arrowright' || (S.single && (k === 'arrowdown' || k === ' '))) { e.preventDefault(); goPage(1); return; }
+    if (k === 'pageup' || k === 'arrowleft' || (S.single && k === 'arrowup')) { e.preventDefault(); goPage(-1); return; }
+    if (k === 'home') { e.preventDefault(); goPage('first'); return; } if (k === 'end') { e.preventDefault(); goPage('last'); return; }
+  }
 }
 
 (async function init() {
   wire();
   if (!LIBS_OK) { $('.drop p').innerHTML = '<b style="color:var(--danger)">Die PDF-Bibliotheken konnten nicht geladen werden.</b> Bitte die Datei neu laden.'; return; }
   await initMeasure();
+  const m = location.hash.match(/^#neu-(a4|a5|a3|letter)-(hoch|quer)-(\d+)$/); if (m) { history.replaceState(null, '', location.href.split('#')[0]); createBlankDoc(m[1], m[2], +m[3]); }
 })();
 </script>
 <script>
