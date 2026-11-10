@@ -166,8 +166,8 @@ main.noleft{--lw:0px}main.noright{--rw:0px}
 .bm-empty{color:var(--muted);font-size:12px;line-height:1.5;padding:10px}
 .thumb{margin:0 auto 12px;width:150px;text-align:center;cursor:pointer;position:relative}
 .thumb .tw{display:inline-block;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);border:2px solid transparent;border-radius:3px;line-height:0}
-.thumb img{max-width:130px;max-height:170px;display:block}
-.thumb .tw.blank{width:110px;height:150px}
+.thumb img{width:100%;height:100%;display:block}
+
 .thumb.cur .tw{border-color:#9fb6f0}
 .thumb.sel .tw{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
 .thumb .tl{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.2}
@@ -221,8 +221,8 @@ body.t-text .page{cursor:text}
 body.dragover #viewer::after{content:"Dateien hier ablegen";position:absolute;inset:10px;border:3px dashed var(--acc);border-radius:14px;background:rgba(47,91,211,.08);display:grid;place-items:center;font-size:20px;color:var(--acc);font-weight:600;pointer-events:none}
 #grid{display:none;flex-wrap:wrap;gap:22px;padding:24px;align-content:flex-start}
 #grid .thumb{width:auto;margin:0}
-#grid .thumb img{max-width:200px;max-height:260px}
-#grid .thumb .tw.blank{width:180px;height:240px}
+
+
 #grid .gb{position:absolute;top:6px;right:6px;display:none;gap:3px}
 #grid .thumb:hover .gb{display:flex}
 #grid .gb button{border:0;background:rgba(27,34,50,.82);color:#fff;border-radius:5px;padding:4px;cursor:pointer;display:grid}
@@ -752,7 +752,8 @@ function fillThumbs(cont, max, grid) {
     if (S.selPages.has(p.id)) t.classList.add('sel'); if (i === S.cur && !grid) t.classList.add('cur');
     const src = p.src ? S.sources.get(p.src) : null; const V = VPfor(p, 1);
     const dims = `${Math.round(V.width / 72 * 25.4)} × ${Math.round(V.height / 72 * 25.4)} mm`;
-    t.innerHTML = `<div class="tw ${p.src ? '' : 'blank'}" style="${p.src ? '' : `aspect-ratio:${V.width}/${V.height};height:auto`}"></div><div class="tl">${i + 1}${grid ? `<br><small>${esc(src ? src.name : 'Leere Seite')} · ${dims}</small>` : ''}</div>` + (grid ? `<div class="gb"><button data-a="rotl" title="Links drehen">${icon('rotl', 15)}</button><button data-a="rotr" title="Rechts drehen">${icon('rotr', 15)}</button><button data-a="dup" title="Duplizieren">${icon('dup', 15)}</button><button data-a="del" title="Löschen">${icon('trash', 15)}</button></div>` : '');
+    const bw = grid ? 200 : 130, bh = grid ? 260 : 170, k = Math.min(bw / V.width, bh / V.height);
+    t.innerHTML = `<div class="tw ${p.src ? '' : 'blank'}" style="width:${Math.round(V.width * k)}px;height:${Math.round(V.height * k)}px"></div><div class="tl">${i + 1}${grid ? `<br><small>${esc(src ? src.name : 'Leere Seite')} · ${dims}</small>` : ''}</div>` + (grid ? `<div class="gb"><button data-a="rotl" title="Links drehen">${icon('rotl', 15)}</button><button data-a="rotr" title="Rechts drehen">${icon('rotr', 15)}</button><button data-a="dup" title="Duplizieren">${icon('dup', 15)}</button><button data-a="del" title="Löschen">${icon('trash', 15)}</button></div>` : '');
     cont.appendChild(t);
     if (p.src) { t._load = () => thumbURL(p, max).then(u => { if (u && t.isConnected) $('.tw', t).innerHTML = `<img src="${u}" alt="Seite ${i + 1}">`; }); cont._tio.observe(t); }
   });
@@ -1455,28 +1456,56 @@ async function splitBySize(bytes, limit, prog) {
   }
   return parts;
 }
+async function splitEqual(bytes, parts, prog) {
+  const src = await L.PDFDocument.load(bytes, { updateMetadata: false }); const n = src.getPageCount(); parts = Math.max(1, Math.min(parts, n));
+  const build = async (a, b) => { const d = await L.PDFDocument.create(); const ps = await d.copyPages(src, Array.from({ length: b - a }, (_, i) => a + i)); ps.forEach(p => d.addPage(p)); if (S.meta.title) d.setTitle(S.meta.title); d.setProducer('PDF-Werkstatt'); return d.save({ useObjectStreams: true }); };
+  const out = []; let s = 0;
+  for (let k = 0; k < parts; k++) {
+    const left = parts - k;
+    if (left === 1) { prog?.(`Teil ${k + 1} von ${parts} wird erstellt …`); out.push({ from: s + 1, to: n, bytes: await build(s, n) }); break; }
+    prog?.(`Teil ${k + 1} von ${parts} wird zusammengestellt …`);
+    const target = (await build(s, n)).length / left; const maxE = n - (left - 1);
+    const cache = new Map(); const sz = async e => { if (!cache.has(e)) cache.set(e, await build(s, e)); return cache.get(e); };
+    let lo = s + 1, hi = maxE;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if ((await sz(mid)).length >= target) hi = mid; else lo = mid + 1; }
+    let e = lo;
+    if (e - 1 >= s + 1) { const a = await sz(e - 1), b = await sz(e); if (Math.abs(a.length - target) < Math.abs(b.length - target)) e = e - 1; }
+    out.push({ from: s + 1, to: e, bytes: await sz(e) }); s = e;
+  }
+  return out;
+}
 async function compressSplitDialog() {
   const origSize = [...new Set(S.pages.map(p => p.src).filter(Boolean))].reduce((a, id) => a + S.sources.get(id).bytes.length, 0);
   let saved = {}; try { saved = JSON.parse(localStorage.getItem('pw_mailopts') || '{}'); } catch { }
-  const o = { comp: true, level: 'mittel', split: false, mb: 15, enc: true, ...saved };
+  const o = { comp: true, level: 'mittel', split: false, mb: 15, enc: true, smode: 'size', parts: 3, ...saved };
   const r = await dialog('Komprimieren & für E-Mail teilen', `
     <div class="hint">Aktuelle Größe: <b>${fmtMB(origSize)}</b> · ${S.pages.length} Seiten. Das Original bleibt unverändert.</div>
     <label style="display:flex;gap:6px;align-items:center;font-weight:600;margin:4px 0 8px"><input type="checkbox" name="comp" ${o.comp ? 'checked' : ''}> Komprimieren</label>
     <div id="cbox"><div class="seg">${Object.entries(CLEVELS).map(([k, v]) => `<button data-lv="${k}" class="${k === o.level ? 'on' : ''}">${v.label}</button>`).join('')}</div><input type="hidden" name="level" value="${o.level}"><div class="hint" id="lvinfo">${CLEVELS[o.level].info}</div></div>
     <label style="display:flex;gap:6px;align-items:center;font-weight:600;margin:12px 0 8px"><input type="checkbox" name="split" ${o.split ? 'checked' : ''}> In Teile für E-Mails aufteilen</label>
-    <div id="sbox"><div class="frow"><div class="fld" style="max-width:150px"><label>Max. Größe pro Mail (MB)</label><input type="number" name="mb" value="${o.mb}" min="0.5" step="0.5"></div><div class="fld" style="flex:2"><label>&nbsp;</label><label style="color:var(--ink);font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" name="enc" ${o.enc ? 'checked' : ''}> Mail-Kodierung einrechnen (empfohlen)</label></div></div>
-    <div class="hint" id="encinfo"></div></div>`,
+    <div id="sbox"><div class="seg"><button data-sp2="size" class="${o.smode === 'size' ? 'on' : ''}">Nach max. Größe pro Mail</button><button data-sp2="count" class="${o.smode === 'count' ? 'on' : ''}">In gleich große Teile</button></div><input type="hidden" name="smode" value="${o.smode}">
+    <div id="ctbox"><div class="frow"><div class="fld" style="max-width:150px"><label>Anzahl Teile</label><input type="number" name="parts" value="${Math.min(o.parts, Math.max(2, S.pages.length))}" min="2" max="${S.pages.length}" step="1"></div><div class="fld" style="flex:2"></div></div><div class="hint" id="ctinfo"></div></div>
+    <div id="szbox"><div class="frow"><div class="fld" style="max-width:150px"><label>Max. Größe pro Mail (MB)</label><input type="number" name="mb" value="${o.mb}" min="0.5" step="0.5"></div><div class="fld" style="flex:2"><label>&nbsp;</label><label style="color:var(--ink);font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" name="enc" ${o.enc ? 'checked' : ''}> Mail-Kodierung einrechnen (empfohlen)</label></div></div>
+    <div class="hint" id="encinfo"></div></div></div>`,
     [{ label: 'Abbrechen', value: null }, { label: 'Start', value: 'ok', pri: true }], m => {
       const upd = () => { const comp = $('[name=comp]', m).checked, split = $('[name=split]', m).checked; $('#cbox', m).style.opacity = comp ? 1 : .4; $('#cbox', m).style.pointerEvents = comp ? '' : 'none'; $('#sbox', m).style.opacity = split ? 1 : .4; $('#sbox', m).style.pointerEvents = split ? '' : 'none';
+        const sm = $('[name=smode]', m).value; $('#ctbox', m).hidden = sm !== 'count'; $('#szbox', m).hidden = sm !== 'size';
+        const np = Math.max(2, Math.min(S.pages.length, Math.round(+$('[name=parts]', m).value || 2))); const per = origSize / np;
+        $('#ctinfo', m).innerHTML = S.pages.length < 2 ? 'Das Dokument hat nur eine Seite und kann nicht geteilt werden.' : `Ohne Komprimierung ca. <b>${fmtMB(per)}</b> pro Teil${$('[name=comp]', m).checked ? ', mit Komprimierung entsprechend weniger' : ''}. Beim Mailversand wird jeder Teil um ca. 37 % größer (≈ ${fmtMB(per * 1.37)}).<br>Da Seiten nicht zerschnitten werden, sind die Teile <b>annähernd</b> gleich groß – je nachdem, wie groß die einzelnen Seiten sind.`;
         const mb = +$('[name=mb]', m).value || 0, enc = $('[name=enc]', m).checked; const eff = enc ? mb / 1.37 : mb;
         $('#encinfo', m).innerHTML = enc ? `Anhänge werden beim Versand um ca. 37 % größer. Jeder Teil wird daher höchstens <b>${eff.toLocaleString('de-DE', { maximumFractionDigits: 1 })} MB</b> groß, damit er mit ${mb.toLocaleString('de-DE')} MB beim Empfänger ankommt.` : `Jeder Teil wird bis zu <b>${mb.toLocaleString('de-DE')} MB</b> groß. Achtung: Beim Versand wächst ein Anhang um ca. 37 % und kann dann abgelehnt werden.`; };
       $$('[data-lv]', m).forEach(b => b.onclick = () => { $$('[data-lv]', m).forEach(x => x.classList.toggle('on', x === b)); $('[name=level]', m).value = b.dataset.lv; $('#lvinfo', m).textContent = CLEVELS[b.dataset.lv].info; });
-      $$('[name=comp],[name=split],[name=enc],[name=mb]', m).forEach(i => i.addEventListener('input', upd)); upd();
+      $$('[data-sp2]', m).forEach(b => b.onclick = () => { $$('[data-sp2]', m).forEach(x => x.classList.toggle('on', x === b)); $('[name=smode]', m).value = b.dataset.sp2; upd(); });
+      $$('[name=comp],[name=split],[name=enc],[name=mb],[name=parts]', m).forEach(i => i.addEventListener('input', upd)); upd();
     });
   if (!r) return; const v = r.vals;
   if (!v.comp && !v.split) return toast('Bitte „Komprimieren“ und/oder „Teilen“ auswählen');
-  const mb = +v.mb; if (v.split && !(mb > 0)) return toast('Bitte eine gültige Größe angeben', 'err');
-  try { localStorage.setItem('pw_mailopts', JSON.stringify({ comp: v.comp, level: v.level, split: v.split, mb, enc: v.enc })); } catch { }
+  const mb = +v.mb, byCount = v.smode === 'count'; const np = Math.round(+v.parts);
+  if (v.split && !byCount && !(mb > 0)) return toast('Bitte eine gültige Größe angeben', 'err');
+  if (v.split && byCount && S.pages.length < 2) return toast('Ein einseitiges Dokument kann nicht geteilt werden', 'err');
+  if (v.split && byCount && !(np >= 2)) return toast('Bitte mindestens 2 Teile angeben', 'err');
+  const parts = Math.min(np, S.pages.length);
+  try { localStorage.setItem('pw_mailopts', JSON.stringify({ comp: v.comp, level: v.level, split: v.split, mb, enc: v.enc, smode: v.smode, parts: np })); } catch { }
   commitEditor(); const prog = t => $('#busyt').textContent = t;
   busy(true, 'PDF wird vorbereitet …');
   try {
@@ -1486,10 +1515,11 @@ async function compressSplitDialog() {
       else { const res = await compressImages(bytes, CLEVELS[v.level], prog); if (res.bytes.length < bytes.length) bytes = res.bytes; if (!res.changed) note = res.images ? 'Die Bilder waren bereits gut komprimiert.' : 'Das PDF enthält kaum Bilder – hier lässt sich wenig einsparen. Nur „Extrem“ verkleinert weiter, wandelt aber Text in Bilder um.'; }
     }
     const base = baseName(); let files;
-    const limit = v.split ? Math.floor(mb * MB / (v.enc ? 1.37 : 1)) : Infinity;
-    if (v.split && bytes.length > limit) {
-      const parts = await splitBySize(bytes, limit, prog);
-      files = parts.map((p, i) => ({ name: `${base}_Teil_${i + 1}_von_${parts.length}.pdf`, bytes: p.bytes, info: `Seiten ${p.from === p.to ? p.from : p.from + '–' + p.to}`, over: p.over }));
+    const limit = v.split && !byCount ? Math.floor(mb * MB / (v.enc ? 1.37 : 1)) : Infinity;
+    if (v.split && (byCount || bytes.length > limit)) {
+      const res = byCount ? await splitEqual(bytes, parts, prog) : await splitBySize(bytes, limit, prog);
+      if (byCount && np > S.pages.length) note = (note ? note + ' ' : '') + `Das Dokument hat nur ${S.pages.length} Seiten – daher ${S.pages.length} Teile statt ${np}.`;
+      files = res.map((p, i) => ({ name: `${base}_Teil_${i + 1}_von_${res.length}.pdf`, bytes: p.bytes, info: `Seiten ${p.from === p.to ? p.from : p.from + '–' + p.to}`, over: p.over }));
     } else files = [{ name: v.comp ? `${base}_komprimiert.pdf` : `${base}.pdf`, bytes, info: `${S.pages.length} Seiten` }];
     busy(false);
     await resultDialog(files, origSize || before, bytes.length, v, note, limit);
@@ -1499,7 +1529,8 @@ async function resultDialog(files, orig, comp, v, note, limit) {
   const total = files.reduce((a, f) => a + f.bytes.length, 0); const pct = orig ? Math.round((1 - comp / orig) * 100) : 0;
   let head = '';
   if (v.comp) head += `<div>Original <b>${fmtMB(orig)}</b> → komprimiert <b>${fmtMB(comp)}</b>${pct > 0 ? ` (${pct} % kleiner)` : ''}</div>`;
-  if (v.split) head += files.length > 1 ? `<div>Aufgeteilt in <b>${files.length} Teile</b> für je eine Mail.</div>` : `<div><b>Passt bereits in eine Mail</b> – kein Teilen nötig.</div>`;
+  if (v.split && v.smode === 'count' && files.length > 1) { const sz = files.map(f => f.bytes.length); head += `<div>Aufgeteilt in <b>${files.length} annähernd gleich große Teile</b> (${fmtMB(Math.min(...sz))} bis ${fmtMB(Math.max(...sz))}).</div>`; }
+  else if (v.split) head += files.length > 1 ? `<div>Aufgeteilt in <b>${files.length} Teile</b> für je eine Mail.</div>` : `<div><b>Passt bereits in eine Mail</b> – kein Teilen nötig.</div>`;
   if (note) head += `<div style="margin-top:6px">${esc(note)}</div>`;
   if (files.some(f => f.over)) head += `<div style="color:var(--danger);margin-top:6px">Mindestens eine einzelne Seite ist größer als das Limit und konnte nicht weiter geteilt werden (rot markiert). Tipp: stärker komprimieren.</div>`;
   const list = files.map(f => `<div class="it" style="cursor:default"><div style="color:${f.over ? 'var(--danger)' : 'var(--acc)'}">${icon('filebig', 18)}</div><div class="m"><div><b>${esc(f.name)}</b></div><small>${fmtMB(f.bytes.length)} · ${f.info}</small></div></div>`).join('');
