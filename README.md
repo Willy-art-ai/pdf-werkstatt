@@ -1,71 +1,53 @@
 # PDF-Werkstatt
 
-Ein kleines Programm mit Fenster für Windows und macOS, das die alltäglichen PDF-Aufgaben erledigt – **ohne Online-Dienst, alles bleibt auf dem eigenen Rechner**.
+Ein PDF-Editor, der **komplett auf dem eigenen Rechner** arbeitet – ohne Upload, ohne Online-Dienst, ohne Konto.
 
-Typischer Anwendungsfall: Eine PDF mit 75 MB soll per E-Mail verschickt werden, der Empfänger nimmt aber nur 15 MB pro Mail an. PDF-Werkstatt komprimiert die Datei und/oder teilt sie automatisch in passende Teile.
+Das Projekt gibt es in zwei Varianten:
 
-![Komprimieren & Teilen](docs/screenshot_komprimieren.png)
+| | **Web-App** (empfohlen) | **Desktop-Programm** |
+|---|---|---|
+| Start | im Browser, als App in Edge/Chrome installierbar | Python-Programm mit Fenster |
+| Installation | keine (oder 1 Klick in Edge) | Python nötig |
+| Funktionen | alles unten Genannte | Komprimieren, Teilen, Zusammenfügen, Seiten, Beschriften, Passwort |
+| Ordner | Hauptverzeichnis | [`desktop/`](desktop/README.md) |
 
-## Funktionen
+![PDF-Werkstatt Web-App](screenshots/web-app.png)
 
-| Reiter | Was es kann |
-|---|---|
-| **Komprimieren & Teilen** | Komprimieren in 3 Stufen (Leicht / Mittel / Stark), optional in Graustufen · Teilen **nach Größe** (z. B. max. 15 MB pro Mail – der Aufschlag durch die Mail-Kodierung wird eingerechnet) oder **nach Seiten** (z. B. alle 100 Seiten) · **Stapelverarbeitung**: mehrere PDFs oder ganzen Ordner auf einmal |
-| **Zusammenfügen** | Mehrere PDFs **und Bilder** (JPG, PNG, TIFF, HEIC, WEBP …) zu einer PDF · Reihenfolge per Maus ziehen · Handyfotos werden automatisch richtig gedreht · optional danach komprimieren |
-| **Seiten** | Seiten herausziehen, löschen oder drehen – Angaben wie `1-3, 7, 10-` |
-| **Beschriften** | Seitenzahlen (verschiedene Formate/Positionen, z. B. Deckblatt ohne Nummer) · Wasserzeichen wie „VERTRAULICH“ oder „ENTWURF“ |
-| **Passwort** | Passwortschutz setzen (AES-256) oder bei eigenen PDFs entfernen |
+## Web-App starten
 
-Dateien lassen sich einfach **per Drag & Drop** ins Fenster ziehen. Das Original wird **nie verändert** – es entsteht immer eine neue Datei.
+**Online:** <https://willy-art-ai.github.io/pdf-werkstatt/>
 
-![Zusammenfügen](docs/screenshot_zusammenfuegen.png)
+**Als Programm installieren (Microsoft Edge oder Chrome):**
+1. Die Adresse oben öffnen.
+2. Rechts in der Adressleiste auf das App-Symbol klicken („App verfügbar – installieren“) oder Menü **…** → **Apps** → **PDF-Werkstatt installieren**.
+3. Optional als Standard-App für PDFs festlegen: Rechtsklick auf eine PDF → **Öffnen mit** → **Andere App auswählen** → **PDF-Werkstatt** → **Immer**.
 
-## Installation und Start
+Danach läuft die App in einem eigenen Fenster, auch **ohne Internet**. Deine PDFs werden nie hochgeladen.
 
-1. **Python 3** installieren: <https://www.python.org/downloads/>
-   *Windows:* beim Installieren unbedingt **„Add python.exe to PATH“** anhaken.
-2. Dieses Projekt herunterladen: oben rechts auf **Code → Download ZIP**, dann entpacken.
-3. Starten:
-   - **Windows:** Doppelklick auf `Starten_Windows.bat`
-     (Tipp: eine PDF direkt auf die Datei ziehen öffnet sie gleich im Programm)
-   - **macOS:** Rechtsklick auf `Starten_Mac.command` → **Öffnen** (beim ersten Mal nötig)
+## Funktionen der Web-App
 
-Beim ersten Start werden die benötigten Bibliotheken automatisch installiert.
+- **Anzeigen:** schnelles Öffnen auch großer Dateien, Seitenminiaturen, Einzelseiten- oder Fließansicht, Blättern mit ▲▼ / Tastatur, Zoom, Volltextsuche, Lesezeichen
+- **Kommentieren:** Textmarker (rastet auf Textzeilen ein), Notizen, Freihand, Linien, Pfeile, Formen, Stempel (auch eigene, auch aus Bildern), Unterschrift – als echte PDF-Kommentare, wahlweise **löschbar** oder **fest eingebrannt**
+- **Bearbeiten:** vorhandenen Text ändern, Text und Bilder einfügen, abdecken, zuschneiden, Wasserzeichen, Kopf-/Fußzeilen und Seitenzahlen (Formate wie „- 1 -“ oder „Seite 1 von 9“, auf Wunsch ab Seite 2)
+- **Seiten organisieren:** per Drag & Drop sortieren, drehen, löschen, duplizieren, einfügen, extrahieren, PDFs und Bilder zusammenführen – auch per Bereichsangabe wie `1-3, 7, 10-`
+- **Komprimieren & teilen:** 3 Stufen (+ „Extrem“), optional Graustufen; Teilen **nach Größe** (z. B. max. 15 MB pro Mail, Mail-Kodierung eingerechnet), **in gleich große Teile** oder **nach Seiten** (z. B. alle 100 Seiten)
+- **Stapelverarbeitung:** mehrere PDFs oder einen ganzen Ordner auf einmal komprimieren und/oder teilen
+- **Formulare:** ausfüllen, eigene Felder anlegen, reduzieren – Felder bleiben auch nach Teilen und Zusammenführen ausfüllbar
+- **Schützen:** Passwortschutz mit AES-256 setzen oder entfernen, Schwärzen (endgültig), Metadaten bearbeiten/entfernen
+- **Texterkennung (OCR):** gescannte Seiten durchsuchbar machen (Deutsch/Englisch, läuft lokal)
+- **Exportieren:** als Bilder (PNG/JPG), als Text; Bilder (JPG, PNG, GIF, WEBP …) zu PDF – Handyfotos werden automatisch richtig gedreht
 
-Für Entwickler:
+## Datenschutz
 
-```bash
-pip install -r requirements.txt
-python pdf_werkstatt.py
-```
-
-## Kommandozeile
-
-Komprimieren und Teilen funktioniert auch ohne Fenster:
-
-```bash
-python pdf_werkstatt.py Datei.pdf --komprimieren mittel --teilen 15     # max. 15 MB pro Mail
-python pdf_werkstatt.py Datei.pdf --komprimieren stark --graustufen
-python pdf_werkstatt.py Datei.pdf --seiten 100                          # alle 100 Seiten ein Teil
-python pdf_werkstatt.py --help
-```
-
-## Gut zu wissen
-
-- **Mail-Kodierung:** E-Mail-Anhänge werden beim Versand ca. 37 % größer. Mit der (standardmäßig aktiven) Option „Mail-Kodierung einrechnen“ werden die Teile bei 15 MB Limit max. ca. 10,9 MB groß – so kommen sie sicher an.
-- **Komprimieren** verkleinert nur Bilder; Text bleibt durchsuchbar und kopierbar. Reine Text-PDFs lassen sich kaum verkleinern – dann wird das Original verwendet.
-- Eine einzelne Seite wird nie zerschnitten. Ist eine Seite allein größer als das Limit, gibt es eine Warnung.
-- Passwortgeschützte PDFs müssen erst im Reiter „Passwort“ entsperrt werden.
-
-Ausführliche Bedienungsanleitung: [LIESMICH.txt](LIESMICH.txt)
+Alles läuft im Browser auf deinem Gerät. Von GitHub wird nur das Programm selbst geladen; deine Dateien verlassen den Rechner nicht. Selbst prüfen: Internet ausschalten, PDF öffnen, bearbeiten, speichern – es funktioniert.
 
 ## Getestet
 
-Das Programm wurde mit 36 Szenarien geprüft – u. a. 117-MB- und 1000-Seiten-PDFs, Formulare, CMYK- und transparente Bilder, gedrehte/beschnittene Seiten, verschiedene Verschlüsselungen, defekte Dateien und Dateinamen mit Umlauten. Ergebnisse: [PRUEFBERICHT.txt](PRUEFBERICHT.txt)
+Die Web-App wurde mit **36 automatisierten Szenarien** geprüft – u. a. eine 90-MB-Foto-PDF, 250- und 400-seitige PDFs, Handyfotos in allen Drehlagen, 16-Bit-PNG, animierte GIFs, HEIC/TIFF, CMYK-Bilder, Formulare, vier Verschlüsselungsarten, defekte Dateien, Umlaute und chinesische Zeichen im Dateinamen. Ergebnisse: [PRUEFBERICHT-WEBAPP.md](PRUEFBERICHT-WEBAPP.md)
 
 ## Verwendete Bibliotheken
 
-[pikepdf](https://github.com/pikepdf/pikepdf) (MPL-2.0) · [Pillow](https://python-pillow.org) (MIT-CMU) · [ReportLab](https://www.reportlab.com/opensource/) (BSD) · [tkinterdnd2](https://github.com/Eliav2/tkinterdnd2) (MIT) · optional [pillow-heif](https://github.com/bigcat88/pillow_heif) (BSD-3)
+[pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0) · [pdf-lib](https://github.com/Hopding/pdf-lib) (MIT) · [JSZip](https://github.com/Stuk/jszip) (MIT) · [Tesseract.js](https://github.com/naptha/tesseract.js) mit Sprachdaten von [tessdata](https://github.com/tesseract-ocr/tessdata) (Apache-2.0) · Schriften Inter, Dancing Script, Caveat (SIL Open Font License)
 
 ## Lizenz
 

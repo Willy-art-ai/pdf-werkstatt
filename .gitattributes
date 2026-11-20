@@ -2,3 +2,6 @@
 *.bat text eol=crlf
 *.command text eol=lf
 *.png binary
+*.wasm binary
+ocr/** -text
+index.html -text
