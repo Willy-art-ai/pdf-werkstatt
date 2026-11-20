@@ -1,0 +1,6 @@
+pikepdf>=8.0
+pillow>=9.0
+reportlab>=3.6
+tkinterdnd2>=0.3
+# optional: iPhone-Fotos (.heic) beim Zusammenfügen
+pillow-heif>=0.10

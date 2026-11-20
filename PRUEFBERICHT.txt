@@ -1,0 +1,90 @@
+PDF-Werkstatt – Prüfbericht vom 20.11.2026
+==================================================
+
+36 Szenarien, alle bestanden. Jedes Ergebnis wurde automatisch geprüft:
+Seitenzahl, Reihenfolge, Größenlimits, Dateigültigkeit (qpdf --check),
+Darstellung, Farbtreue und verständliche Fehlermeldungen.
+
+S01 [OK     ] Text-PDF ohne Bilder komprimieren (alle 3 Stufen) – darf nicht größer werden, Text bleibt
+      → kein Größenzuwachs; Hinweis „Original wird verwendet“ wenn nichts zu holen ist
+S02 [OK     ] Bild-PDF (117 MB, 30 Fotos) in 3 Stufen komprimieren – Stufen abgestuft, Bildgrößen eingehalten
+      → 117 MB → leicht 12.8 MB, mittel 7.5 MB, stark 3.3 MB (je ~5s)
+S03 [OK     ] CMYK-Bild im PDF komprimieren – Farben dürfen nicht kippen/invertieren
+      → mittlere Farbabweichung 0.0 (von 255) – unauffällig
+S04 [OK     ] Bild mit Transparenz (Maske) komprimieren – Hintergrund darf nicht schwarz/weiß werden
+      → Maske erhalten, Abweichung 0.3
+S05 [OK     ] Graustufen-Umwandlung – alle Fotos grau, Text unverändert
+      → alle Bilder DeviceGray, 6.9 MB
+S06 [OK     ] Bereits komprimierte Datei erneut komprimieren
+      → kein Fehler, kein Größenzuwachs
+S07 [OK     ] Teilen nach Größe (15 MB, Mail-Kodierung) – jeder Teil passt in die Mail, Reihenfolge stimmt
+      → 10 Teile, größter 9.4 MB (Limit 10.9 MB)
+S08 [OK     ] Teilen nach Größe ohne Mail-Kodierung – Teile nutzen das Limit gut aus
+      → 5 Teile à max. 18.7 MB
+S09 [OK     ] Teilen, wenn schon eine einzelne Seite größer als das Limit ist
+      → keine Seite geht verloren, Warnung je übergroßer Seite mit Tipp „vorher komprimieren“
+S10 [OK     ] Teilen nach Seiten: 1000 S./100, 40 S./1, 40 S./40, 40 S./7
+      → 10×100 | 40×1 | „kein Teilen nötig“ | 7,7,7,7,7,5
+S11 [OK     ] Komprimieren + Teilen kombiniert – keine Zwischendateien bleiben liegen
+      → 6 Teile (≤2 MB-Mail) bzw. 3 Teile à 10 Seiten, Temp-Ordner sauber
+S12 [OK     ] Formular, Links und Lesezeichen bleiben beim Komprimieren erhalten
+      → Formularfelder, 4 Lesezeichen, Links vorhanden
+S13 [OK     ] Formular beim Teilen / Seiten herausziehen – ausgefüllte Werte bleiben sichtbar und ausfüllbar
+      → Felder bleiben ausfüllbar, Wert „Max Mustermann“ sichtbar
+S14 [OK     ] Zusammenfügen: verschiedene Seitengrößen + dieselbe Datei doppelt
+      → 56 Seiten in richtiger Reihenfolge, Formate unverändert
+S15 [OK     ] Bilder → PDF: JPG grau/CMYK, 16-Bit-PNG, Paletten-PNG transparent, GIF animiert, Fax-TIFF, WEBP, BMP, HEIC
+      → 12 Seiten, alle darstellbar (21.6 MB)
+S16 [OK     ] Handyfotos mit EXIF-Drehung 3/6/8 (A4 und „wie Bild“) – Ausrichtung wie auf dem Handy
+      → Ausrichtung 3/6/8 identisch mit Handy-Anzeige, Hoch-/Querformat korrekt
+S17 [OK     ] Defektes Bild / falsche Datei beim Zusammenfügen – verständliche Meldung
+      → Das Bild „kaputt.jpg“ konnte nicht gelesen werden.
+S18 [OK     ] Zusammenfügen + danach komprimieren – deutlich kleiner
+      → 19.0 MB → 0.5 MB
+S19 [OK     ] Seitenangaben verstehen (13 Schreibweisen inkl. Fehler)
+      → 10 gültige + 4 ungültige Angaben richtig behandelt
+S20 [OK     ] Seiten herausziehen / löschen / mehrfach drehen (auch vererbte Drehung)
+      → Reihenfolge wie angegeben (40,1-3 → 1,2,3,40), Drehungen addieren sich
+S21 [OK     ] Beschriften auf gedrehten, beschnittenen und unterschiedlich großen Seiten – Position sichtbar richtig
+      → Seitenzahl unten mittig auf allen Drehungen/Beschnitten/Formaten
+S22 [OK     ] Beschriften – Randfälle: ab Seite > Seitenzahl, Startnr. 0, Umlaute, nicht darstellbare Schrift
+      → Fehleingaben abgefangen, Umlaute/Gedankenstrich korrekt, Deckblatt ohne Nummer
+S23 [OK     ] 1000-Seiten-PDF beschriften – Geschwindigkeit und Vollständigkeit
+      → 2.6 s für 1000 Seiten
+S24 [OK     ] Passwort setzen (Sonderzeichen/Umlaute) und wieder entfernen, falsches/leeres Passwort
+      → AES-256, Passwort mit Umlauten/Leerzeichen funktioniert
+S25 [OK     ] Andere Schutzarten: nur Rechte-Passwort, alte RC4-Verschlüsselung, Umlaut-Passwort
+      → Rechte-Passwort, RC4 und AES entfernt; geschützte Datei → klarer Hinweis
+S26 [OK     ] Defekte und falsche Dateien (abgeschnitten, 0 Byte, Text als .pdf) in allen Funktionen
+      → 10× verständliche Meldung („„leer.pdf“ ist beschädigt oder keine echte PDF-Datei und kann nicht gelesen werden.“); abgeschnittene PDF: verständlich gemeldet
+S27 [OK     ] Umlaute, Leerzeichen, Sonderzeichen und Chinesisch in Datei- und Ordnernamen – alle Funktionen
+      → 7 Ergebnisdateien, alle gültig
+S28 [OK     ] Nie etwas überschreiben – mehrfach ausführen, Ergebnisname = vorhandene Datei
+      → „Zusammengefügt (2).pdf“, „text40_gedreht (2).pdf“ – Originale unberührt
+S29 [OK     ] Zielordner nicht beschreibbar (als normaler Benutzer) – Fehler wird erkannt
+      → PermissionError → im Fenster verständliche Meldung; Kommandozeile ohne Absturztext
+S30 [OK     ] Kommandozeile: alle Optionen und Fehleingaben
+      → gültige Aufrufe laufen, 7 Fehleingaben ohne Absturz abgefangen
+S31 [OK     ] Fenster: Eingabeprüfung Komprimieren & Teilen (leer, falsche Zahlen, Komma, Vorschau)
+      → 12 Fehleingaben abgefangen, Komma-Zahl „0,01“ akzeptiert, Vorschau „→ 3 Teil(e)“
+S32 [OK     ] Fenster: Stapelverarbeitung eines Ordners mit guten, defekten und geschützten Dateien
+      → 5 PDFs (1 Bild ignoriert): 2 verarbeitet, 3 defekt/geschützt sauber übersprungen und benannt
+S33 [OK     ] Fenster: Zusammenfügen – Reihenfolge mit der Maus ziehen, ↑, Entfernen, Dateiname mit Sonderzeichen
+      → Reihenfolge per Maus/↑/Entfernen korrekt, ungültige Zeichen im Namen ersetzt → „Test_ _Ergebnis__.pdf“
+S34 [OK     ] Fenster: Passwort-Reiter – leer, nicht übereinstimmend, setzen, falsches und richtiges Entfernen
+      → Pflichtfelder, Tippfehler-Prüfung, falsches Passwort – alles mit klarer Meldung
+S35 [OK     ] Fenster: falsche Dateien/Ordner hineinziehen, kaputtes Bild, unmögliche Seitenzahl
+      → falsche Dateitypen je Reiter gemeldet, Ordner-Drop, kaputtes Bild & „ab Seite 99“ verständlich abgelehnt
+S36 [OK     ] Start mit Datei (PDF auf Start-Datei gezogen, Name mit Umlauten/Chinesisch)
+      → Datei vorausgewählt, 5 Seiten erkannt
+
+Bei der Prüfung gefundene und behobene Fehler:
+ 1. Formularfelder nach Teilen/Herausziehen/Zusammenfügen nicht mehr ausfüllbar
+ 2. Animierte GIFs wurden zu mehreren Seiten
+ 3. 16-Bit-PNGs wurden fast weiß
+ 4. EXIF-Drehung von Handyfotos nicht in jedem Fall angewendet
+ 5. Seitenzahl/Wasserzeichen falsch auf Seiten mit vererbter Drehung
+ 6. Wasserzeichen auf sehr schmalen Seiten abgeschnitten
+ 7. Defekte/falsche Dateien und unmögliche Eingaben ohne verständliche Meldung
+ 8. Kommandozeile zeigte bei fehlenden Schreibrechten einen Absturztext
+ + Kleinigkeiten: kleine Dateien als „0.0 MB“ angezeigt; „Teil_1_von_1“ statt „passt in eine Mail“
