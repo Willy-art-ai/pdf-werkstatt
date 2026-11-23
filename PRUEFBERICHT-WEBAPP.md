@@ -2,11 +2,11 @@
 
 Automatisierte Testreihe: Die App wird in einem Browser (Chromium) bedient, jedes Ergebnis wird unabhängig geprüft – Seitenzahl und -reihenfolge (pdfinfo/pdftotext), Gültigkeit (qpdf --check), Größenlimits, Darstellung (Pixelanalyse), Formularfelder (pypdf) und Verschlüsselung (qpdf).
 
-**Ergebnis: 37 von 37 Szenarien bestanden.** Fehler im Browser während des Laufs: keine.
+**Ergebnis: 39 von 39 Szenarien bestanden.** Fehler im Browser während des Laufs: keine.
 
 | Nr. | Szenario | Ergebnis | Details |
 |---|---|---|---|
-| S01 | Große Foto-PDF (90 MB) öffnen | ✅ bestanden | 26 Seiten, 3.8 s bis zur Anzeige |
+| S01 | Große Foto-PDF (90 MB) öffnen | ✅ bestanden | 26 Seiten, 1.9 s bis zur Anzeige |
 | S02 | Komprimieren „leicht“ | ✅ bestanden | 90,7 → 20.1 MB, Text durchsuchbar: true, qpdf ok |
 | S03 | Komprimieren „mittel“ | ✅ bestanden | 90,7 → 5.2 MB, Text durchsuchbar: true, qpdf ok |
 | S04 | Komprimieren „stark“ | ✅ bestanden | 90,7 → 1.5 MB, Text durchsuchbar: true, qpdf ok |
@@ -43,12 +43,15 @@ Automatisierte Testreihe: Die App wird in einem Browser (Chromium) bedient, jede
 | S34 | Zusammenführen: Reihenfolge per Maus ziehen | ✅ bestanden | Seite 3, Seite 1, Seite 2 |
 | S35 | Neue leere PDF + Text + Speichern | ✅ bestanden | 2 Seiten, Page size:       841.89 x 595.28 pts (A4), Text: "Neu erstellt äöü" |
 | S36 | Doppelte und leere Seiten in einer Akte finden | ✅ bestanden | 13 doppelte Seiten in 3 Blöcken und 2 leere Seiten → 34 − 15 = 19 Seiten, Gutachten noch 5×1 Seite, alle 3 Rechnungen erhalten |
+| S37 | Doppelte Seiten: gescannte Seiten „nicht prüfen“ | ✅ bestanden | 10 doppelte Seiten in 2 Blöcken und 2 leere Seiten – in 1.5 s (Scans ausgelassen) |
+| S38 | Große Akte (74 S., 46 Scans): nur verdächtige Scans lesen | ✅ bestanden | 13 doppelte Seiten in 3 Blöcken und 2 leere Seiten · gelesen 6 von 46 Scans · 32 s |
 
 ## Während der Prüfung gefundene und behobene Fehler
 
 1. **PDFs, die von anderen Programmen verschlüsselt wurden** (z. B. qpdf, Acrobat), ließen sich öffnen, aber nicht speichern: Ihre Objekt-Container wurden beim Entschlüsseln nicht ausgepackt. Behoben; zusätzlich übernimmt die App bei einer unvollständigen Entschlüsselung die Seiten automatisch als Bild statt abzubrechen.
 2. **Formularfelder** waren nach Teilen, Extrahieren oder Zusammenführen nicht mehr ausfüllbar. Behoben.
 3. **Doppelte Seiten (Entwicklung):** Ein reiner Bildvergleich verwechselte gescannte Seiten mit gleichem Aufbau, aber anderen Zahlen. Deshalb gilt jetzt: Seiten sind nur doppelt, wenn ihr Text übereinstimmt – alle Zahlen exakt; gescannte Seiten werden dafür per Texterkennung gelesen. Nur optisch ähnliche Treffer werden nie automatisch vorausgewählt.
+4. **Doppelte Seiten in großen Akten:** Der Textvergleich verglich zunächst nur, welche Wörter vorkommen – Seiten mit ähnlichem Wortschatz galten fälschlich als doppelt (27 statt 13 Treffer). Jetzt werden Wortfolgen verglichen; außerdem liest die Texterkennung nur noch verdächtige Scans (6 statt 46 Seiten, 33 statt 135 Sekunden).
 
 ## Hinweise
 

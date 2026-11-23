@@ -30,7 +30,7 @@ Danach läuft die App in einem eigenen Fenster, auch **ohne Internet**. Deine PD
 - **Kommentieren:** Textmarker (rastet auf Textzeilen ein), Notizen, Freihand, Linien, Pfeile, Formen, Stempel (auch eigene, auch aus Bildern), Unterschrift – als echte PDF-Kommentare, wahlweise **löschbar** oder **fest eingebrannt**
 - **Bearbeiten:** vorhandenen Text ändern, Text und Bilder einfügen, abdecken, zuschneiden, Wasserzeichen, Kopf-/Fußzeilen und Seitenzahlen (Formate wie „- 1 -“ oder „Seite 1 von 9“, auf Wunsch ab Seite 2)
 - **Seiten organisieren:** per Drag & Drop sortieren, drehen, löschen, duplizieren, einfügen, extrahieren, PDFs und Bilder zusammenführen – auch per Bereichsangabe wie `1-3, 7, 10-`
-- **Doppelte und leere Seiten finden:** z. B. Gutachten, die mehrfach als E-Mail-Anhang in einer Akte stecken – Vergleich nach Text (alle Zahlen exakt), gescannte Seiten per Texterkennung; Ergebnisliste mit Vorschau, das erste Vorkommen bleibt immer erhalten
+- **Doppelte und leere Seiten finden:** z. B. Gutachten, die mehrfach als E-Mail-Anhang in einer Akte stecken – Vergleich nach Text (Wortfolge, alle Zahlen exakt); gescannte Seiten wahlweise per Texterkennung (nur verdächtige Seiten), nur optisch oder gar nicht prüfen; Ergebnisliste mit Vorschau, das erste Vorkommen bleibt immer erhalten
 - **Komprimieren & teilen:** 3 Stufen (+ „Extrem“), optional Graustufen; Teilen **nach Größe** (z. B. max. 15 MB pro Mail, Mail-Kodierung eingerechnet), **in gleich große Teile** oder **nach Seiten** (z. B. alle 100 Seiten)
 - **Stapelverarbeitung:** mehrere PDFs oder einen ganzen Ordner auf einmal komprimieren und/oder teilen
 - **Formulare:** ausfüllen, eigene Felder anlegen, reduzieren – Felder bleiben auch nach Teilen und Zusammenführen ausfüllbar
@@ -44,7 +44,7 @@ Alles läuft im Browser auf deinem Gerät. Von GitHub wird nur das Programm selb
 
 ## Getestet
 
-Die Web-App wurde mit **37 automatisierten Szenarien** geprüft – u. a. eine 90-MB-Foto-PDF, 250- und 400-seitige PDFs, Handyfotos in allen Drehlagen, 16-Bit-PNG, animierte GIFs, HEIC/TIFF, CMYK-Bilder, Formulare, vier Verschlüsselungsarten, defekte Dateien, Umlaute und chinesische Zeichen im Dateinamen sowie eine Akte mit mehrfach enthaltenen Gutachten. Ergebnisse: [PRUEFBERICHT-WEBAPP.md](PRUEFBERICHT-WEBAPP.md)
+Die Web-App wurde mit **39 automatisierten Szenarien** geprüft – u. a. eine 90-MB-Foto-PDF, 250- und 400-seitige PDFs, Handyfotos in allen Drehlagen, 16-Bit-PNG, animierte GIFs, HEIC/TIFF, CMYK-Bilder, Formulare, vier Verschlüsselungsarten, defekte Dateien, Umlaute und chinesische Zeichen im Dateinamen sowie eine Akte mit mehrfach enthaltenen Gutachten. Ergebnisse: [PRUEFBERICHT-WEBAPP.md](PRUEFBERICHT-WEBAPP.md)
 
 ## Verwendete Bibliotheken
 

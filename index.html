@@ -2306,7 +2306,7 @@ function panelDoc(b) {
 
 /* ================= Seitenbereich / Passwort entfernen / Stapelverarbeitung ================= */
 /* ================= Doppelte Seiten finden ================= */
-const DUP_LEVELS = { streng: { thr: 10, fine: 0.99, jac: 0.97, label: 'Streng – nur nahezu identische Seiten' }, normal: { thr: 24, fine: 0.97, jac: 0.9, label: 'Normal (empfohlen)' }, tolerant: { thr: 40, fine: 0.93, jac: 0.8, label: 'Großzügig – auch stärker abweichende Scans' } };
+const DUP_LEVELS = { streng: { thr: 10, fine: 0.99, jac: 0.9, label: 'Streng – nur nahezu identische Seiten' }, normal: { thr: 24, fine: 0.97, jac: 0.75, label: 'Normal (empfohlen)' }, tolerant: { thr: 40, fine: 0.93, jac: 0.6, label: 'Großzügig – auch stärker abweichende Scans' } };
 function popcnt32(x) { x -= (x >>> 1) & 0x55555555; x = (x & 0x33333333) + ((x >>> 2) & 0x33333333); return (((x + (x >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24; }
 const hamming = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) d += popcnt32(a[i] ^ b[i]); return d; };
 async function pageFingerprint(p, cv, small) {
@@ -2342,6 +2342,8 @@ function fineSim(a, b) {
 function jaccard(a, b) { if (!a.size && !b.size) return 1; let i = 0; for (const x of a) if (b.has(x)) i++; return i / (a.size + b.size - i); }
 const nums = t => (t.match(/\d+(?:[.,:\/-]\d+)*/g) || []).join('|');
 const wordSet = t => new Set(t.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 1));
+// Wortfolgen (je 3 aufeinanderfolgende Wörter) – erkennt Kopien, aber nicht Seiten, die nur ähnliche Wörter enthalten
+const shingles = t => { const w = t.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(x => x.length > 1); if (w.length < 3) return new Set(w); const o = new Set(); for (let i = 0; i + 2 < w.length; i++) o.add(w[i] + ' ' + w[i + 1] + ' ' + w[i + 2]); return o; };
 async function dupesDialog() {
   const pages = S.pages.filter(p => p.src); if (pages.length < 2) return toast('Zu wenige Seiten für einen Vergleich');
   let saved = {}; try { saved = JSON.parse(localStorage.getItem('pw_dupes') || '{}'); } catch { }
@@ -2349,35 +2351,50 @@ async function dupesDialog() {
   for (const p of pages) { const tc = await getText(p); const n = tc.items.reduce((a, it) => a + (it.str || '').trim().length, 0); if (n < 20 && !(p.ocr && p.ocr.length)) scans.push(p); }
   busy(false);
   const canOcr = location.protocol !== 'file:'; const mins = Math.max(1, Math.round(scans.length * 3.5 / 60));
+  let smode = saved.scanmode || (saved.ocr === false ? 'visual' : 'ocr'); if (smode === 'ocr' && !canOcr) smode = 'visual';
   const r = await dialog('Doppelte Seiten finden', `
     <div class="hint">Vergleicht alle ${S.pages.length} Seiten. Wiederholte Seiten – z. B. dasselbe Gutachten, das mehrfach als E-Mail-Anhang in der Akte steckt – werden zu Blöcken zusammengefasst. Das <b>erste Vorkommen bleibt</b> immer erhalten; vor dem Löschen siehst du eine Liste und kannst alles prüfen.<br><br><b>Sicherheitsregel:</b> Seiten gelten nur als doppelt, wenn ihr <b>Text übereinstimmt – alle Zahlen exakt</b>. Rechnungen mit anderem Betrag oder Schreiben mit anderem Datum bleiben also erhalten.</div>
     <div class="fld"><label>Genauigkeit</label><select name="lvl">${Object.entries(DUP_LEVELS).map(([k, v]) => `<option value="${k}" ${k === (saved.lvl || 'normal') ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div>
     <label style="display:block;color:var(--ink);margin-bottom:6px"><input type="checkbox" name="blank" ${saved.blank !== false ? 'checked' : ''}> Leere Seiten ebenfalls finden</label>
-    ${scans.length ? `<label style="display:block;color:var(--ink)"><input type="checkbox" name="ocr" ${canOcr && (saved.ocr !== false) ? 'checked' : ''} ${canOcr ? '' : 'disabled'}> ${scans.length} gescannte Seite${scans.length > 1 ? 'n' : ''} vorher per Texterkennung lesen <small style="color:var(--muted)">(ca. ${mins} Min.; deutlich zuverlässiger, macht diese Seiten zugleich durchsuchbar)</small></label>
-      <div class="hint" style="margin-top:6px">${canOcr ? 'Ohne Texterkennung werden gescannte Seiten nur nach dem Aussehen verglichen. Solche Treffer werden angezeigt, aber <b>nicht vorausgewählt</b>.' : 'Die Texterkennung ist in dieser Offline-Datei nicht verfügbar. Gescannte Seiten werden nur nach dem Aussehen verglichen; solche Treffer werden angezeigt, aber <b>nicht vorausgewählt</b>.'}</div>` : ''}`,
-    [{ label: 'Abbrechen', value: null }, { label: 'Suchen', value: 'ok', pri: true }]);
+    ${scans.length ? `<div class="fld" style="margin-top:6px"><label>${scans.length} gescannte Seite${scans.length > 1 ? 'n' : ''} (ohne Textebene)</label><select name="scanmode">
+        <option value="ocr" ${canOcr && smode === 'ocr' ? 'selected' : ''} ${canOcr ? '' : 'disabled'}>per Texterkennung prüfen – nur verdächtige Seiten, Deutsch${canOcr ? '' : ' (hier nicht verfügbar)'}</option>
+        <option value="visual" ${smode === 'visual' ? 'selected' : ''}>nur nach Aussehen vergleichen – schnell, Treffer nicht vorausgewählt</option>
+        <option value="skip" ${smode === 'skip' ? 'selected' : ''}>nicht prüfen – am schnellsten</option></select></div>
+      <div class="hint" id="scanhint" style="margin-top:0"></div>` : ''}`,
+    [{ label: 'Abbrechen', value: null }, { label: 'Suchen', value: 'ok', pri: true }], m => {
+      const sel = $('[name=scanmode]', m); if (!sel) return;
+      const upd = () => { $('#scanhint', m).innerHTML = { ocr: `Zuerst werden alle Seiten optisch verglichen. Per Texterkennung (Deutsch) gelesen werden danach <b>nur Scans, die einer anderen Seite ähneln</b> – und nach Text verglichen (alle Zahlen exakt). Höchstens ca. ${mins} Min., meist deutlich weniger.`, visual: 'Gescannte Seiten werden nur nach dem Aussehen verglichen. Treffer werden gelb markiert und <b>nicht vorausgewählt</b> – bitte selbst ansehen.', skip: 'Gescannte Seiten werden beim Vergleich ausgelassen und nie als doppelt gemeldet. Leere Seiten werden trotzdem gefunden.' }[sel.value]; };
+      sel.onchange = upd; upd();
+    });
   if (!r) return; const lvl = DUP_LEVELS[r.vals.lvl] ? r.vals.lvl : 'normal'; const L_ = DUP_LEVELS[lvl];
-  try { localStorage.setItem('pw_dupes', JSON.stringify({ lvl, blank: r.vals.blank, ocr: r.vals.ocr })); } catch { }
+  const scanmode = r.vals.scanmode || 'ocr'; r.vals.ocr = scanmode === 'ocr';
+  try { localStorage.setItem('pw_dupes', JSON.stringify({ lvl, blank: r.vals.blank, scanmode })); } catch { }
   ocrCancel = false; busy(true, 'Seiten werden verglichen …'); $('#busyx').hidden = false; const prog = t => $('#busyt').textContent = t;
-  // 1) gescannte Seiten per Texterkennung lesen
-  if (r.vals.ocr && scans.length && canOcr) {
-    const res = new Map();
-    try { const worker = await getOcrWorker('deu+eng', prog); for (let i = 0; i < scans.length && !ocrCancel; i++) { prog(`Gescannte Seiten werden gelesen … ${i + 1} von ${scans.length}`); res.set(scans[i].id, await ocrPage(scans[i], worker)); } }
-    catch (e) { console.error(e); toast('Texterkennung nicht möglich – Scans werden nur optisch verglichen', 'err', 6000); }
-    if (res.size) { pushUndo(); for (const [id, w] of res) { const p = pageById(id); if (p) p.ocr = w; } linesCache.clear(); }
-    if (ocrCancel) { busy(false); $('#busyx').hidden = true; return toast('Abgebrochen'); }
-  }
-  // 2) Fingerabdrücke
+  // 1) Fingerabdrücke aller Seiten (schnell)
   const cv = document.createElement('canvas'), small = document.createElement('canvas');
   const fp = new Map(); let done = 0;
+  const finalize = (f, p) => { f.ocrText = (p.ocr || []).map(w => w.str).join(' ').replace(/\s+/g, ' ').trim(); const t = f.text.length >= 20 ? f.text : f.ocrText; f.kind = f.text.length >= 20 ? 'text' : f.ocrText.length >= 20 ? 'ocr' : 'bild'; f.t = t; f.nums = nums(t); f.words = wordSet(t); f.sh = shingles(t); };
   try {
     for (const p of pages) {
-      if (ocrCancel) break; const f = await pageFingerprint(p, cv, small);
-      const t = f.text.length >= 20 ? f.text : f.ocrText; f.kind = f.text.length >= 20 ? 'text' : f.ocrText.length >= 20 ? 'ocr' : 'bild'; f.t = t; f.nums = nums(t); f.words = wordSet(t);
-      fp.set(p.id, f); done++;
+      if (ocrCancel) break; const f = await pageFingerprint(p, cv, small); finalize(f, p); fp.set(p.id, f); done++;
       if (done % 4 === 0) { prog(`Seiten werden verglichen … ${done} von ${pages.length}`); await new Promise(res => setTimeout(res, 0)); }
     }
   } catch (e) { console.error(e); toast('Fehler beim Vergleich: ' + e.message, 'err'); }
+  // 2) Texterkennung nur für verdächtige Scans: gescannte Seiten, die optisch einer anderen Seite ähneln
+  if (scanmode === 'ocr' && canOcr && !ocrCancel) {
+    const isBl = f => f.ink < 0.002 && f.text.length < 3;
+    const scanIds = pages.filter(p => fp.has(p.id) && fp.get(p.id).kind === 'bild' && !isBl(fp.get(p.id)));
+    const cand = new Set();
+    for (const p of scanIds) { const f = fp.get(p.id); for (const q of pages) { if (q === p || !fp.has(q.id)) continue; const g = fp.get(q.id); if (isBl(g) || Math.abs(g.ar - f.ar) > 0.03) continue; if (hamming(f.bits, g.bits) <= 48 && fineSim(f, g) >= 0.6) { cand.add(p.id); if (g.kind === 'bild') cand.add(q.id); break; } } }
+    const todo = scanIds.filter(p => cand.has(p.id));
+    if (todo.length) {
+      const res = new Map();
+      try { const worker = await getOcrWorker('deu', prog); for (let i = 0; i < todo.length && !ocrCancel; i++) { prog(`Verdächtige Scan-Seiten werden gelesen … ${i + 1} von ${todo.length} (von ${scanIds.length} Scans)`); res.set(todo[i].id, await ocrPage(todo[i], worker)); } }
+      catch (e) { console.error(e); toast('Texterkennung nicht möglich – Scans werden nur optisch verglichen', 'err', 6000); }
+      if (res.size) { pushUndo(); for (const [id, w] of res) { const p = pageById(id); if (p) { p.ocr = w; finalize(fp.get(id), p); } } linesCache.clear(); }
+    }
+    S.lastDupOcr = { scans: scanIds.length, read: todo.length };
+  }
   busy(false); $('#busyx').hidden = true; if (ocrCancel && !confirmPartial(done)) return;
   // 3) Gruppieren: jede Seite wird dem ersten passenden früheren Vorkommen zugeordnet
   const order = S.pages.filter(p => fp.has(p.id)); const reps = []; const textMap = new Map(); const dupOf = new Map(); const sure = new Map(); const blanks = [];
@@ -2385,12 +2402,13 @@ async function dupesDialog() {
   const judge = (f, g) => {
     if (Math.abs(g.ar - f.ar) > 0.03) return 0;
     if (f.kind === 'text' && g.kind === 'text') return f.t === g.t && (lvl !== 'streng' || hamming(f.bits, g.bits) <= 12) ? 2 : 0;
-    if (f.kind !== 'bild' && g.kind !== 'bild') return f.nums === g.nums && (f.t === g.t || jaccard(f.words, g.words) >= L_.jac) ? 2 : 0;
+    if (f.kind !== 'bild' && g.kind !== 'bild') return f.nums === g.nums && (f.t === g.t || jaccard(f.sh, g.sh) >= L_.jac) ? 2 : 0;
     return hamming(f.bits, g.bits) <= L_.thr && fineSim(f, g) >= L_.fine ? 1 : 0; // nur optisch – unsicher
   };
   for (const p of order) {
     const f = fp.get(p.id);
     if (isBlank(f)) { blanks.push(p); continue; }
+    if (scanmode === 'skip' && f.kind === 'bild') continue;
     let match = null, how = 0;
     if (f.kind === 'text' && textMap.has(f.t)) { const q = textMap.get(f.t); how = judge(f, fp.get(q.id)); if (how) match = q; }
     if (!match) for (const q of reps) { const h = judge(f, fp.get(q.id)); if (h === 2) { match = q; how = 2; break; } if (h === 1 && !match) { match = q; how = 1; } }
