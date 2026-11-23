@@ -363,7 +363,7 @@ const ICONS = {
   redact:'M3 6h18v4H3zM3 14h12v4H3z', info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.01', imgexp:'M4 5h16v14H4zM8 15l3-3 2 2 3-3 3 3M12 2v3',
   textexp:'M6 3h9l4 4v14H6zM9 12h6M9 16h6M9 8h3', compress:'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7', clean:'M4 4h16v16H4zM8 8l8 8M16 8l-8 8',
   filebig:'M6 3h9l4 4v14H6zM15 3v4h4M9 13h6M9 17h6', copy:'M8 8h12v12H8zM4 16V4h12', front:'M4 4h10v10H4zM10 10h10v10H10z', reverse:'M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4',
-  x:'M6 6l12 12M18 6L6 18', range:'M4 5h4M4 12h4M4 19h4M11 5h9M11 12h9M11 19h9', unlock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 7.5-2M12 15v2', batch:'M7 3h10v4H7zM5 9h14v4H5zM3 15h18v6H3z', single:'M7 3h10v18H7z', ocr:'M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 9h8M8 12h8M8 15h5', mail:'M3 6h18v12H3zM3 7l9 6 9-6', bookmark:'M6 3h12v18l-6-4-6 4z', bmadd:'M6 3h9M6 3v18l6-4 6 4v-7M18 3v6M15 6h6', bmchild:'M4 5h8M8 5v11h12M16 12l4 4-4 4', up:'M12 19V5M6 11l6-6 6 6', down:'M12 5v14M6 13l6 6 6-6', left:'M19 12H5M11 6l-6 6 6 6', right:'M5 12h14M13 6l6 6-6 6', pencil:'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', lock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4M12 15v2', reset:'M4 4v6h6M4 10a8 8 0 1 1 2 6'
+  x:'M6 6l12 12M18 6L6 18', dupfind:'M8 8h12v12H8zM4 16V4h12M11 14l2 2 4-4', range:'M4 5h4M4 12h4M4 19h4M11 5h9M11 12h9M11 19h9', unlock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 7.5-2M12 15v2', batch:'M7 3h10v4H7zM5 9h14v4H5zM3 15h18v6H3z', single:'M7 3h10v18H7z', ocr:'M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 9h8M8 12h8M8 15h5', mail:'M3 6h18v12H3zM3 7l9 6 9-6', bookmark:'M6 3h12v18l-6-4-6 4z', bmadd:'M6 3h9M6 3v18l6-4 6 4v-7M18 3v6M15 6h6', bmchild:'M4 5h8M8 5v11h12M16 12l4 4-4 4', up:'M12 19V5M6 11l6-6 6 6', down:'M12 5v14M6 13l6 6 6-6', left:'M19 12H5M11 6l-6 6 6 6', right:'M5 12h14M13 6l6 6-6 6', pencil:'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', lock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4M12 15v2', reset:'M4 4v6h6M4 10a8 8 0 1 1 2 6'
 };
 const icon = (n, size) => `<svg class="i" viewBox="0 0 24 24" ${size ? `style="width:${size}px;height:${size}px"` : ''}><path d="${ICONS[n] || ''}"/></svg>`;
 function paintIcons(root = document) { $$('[data-i]', root).forEach(e => { if (!e.firstChild) e.innerHTML = icon(e.dataset.i, e.dataset.i === 'filebig' ? 44 : 0); }); }
@@ -848,7 +848,7 @@ const TABS = [
 const TOOLBARS = {
   comment: ['select', '|', 'text', 'highlight', 'note', 'ink', 'line', 'arrow', 'rect', 'ellipse', '|', 'stamp', 'sign', '|', 'clist', 'cdelall', 'cflat'],
   edit: ['select', '|', 'edittext', 'text', 'image', 'cover', 'crop', '|', 'watermark', 'header', '|', 'ocr'],
-  pages: ['organize', 'bookmark', '|', 'selrange', 'rotl', 'rotr', 'del', 'blank', 'insertfile', 'dup', 'reverse', '|', 'extract', 'split', 'mergeb'],
+  pages: ['organize', 'bookmark', '|', 'dupes', 'selrange', 'rotl', 'rotr', 'del', 'blank', 'insertfile', 'dup', 'reverse', '|', 'extract', 'split', 'mergeb'],
   forms: ['select', '|', 'formfill', 'ftext', 'fcheck', 'flatten', '|', 'sign', 'text', 'stamp'],
   protect: ['encrypt', 'unprotect', '|', 'select', 'redact', 'redactsearch', '|', 'cflat', 'docprops', 'stripmeta'],
   convert: ['compress', 'batch', 'ocr', '|', 'savepdf', 'encrypt', 'imgexp', 'textexp', '|', 'imgs2pdf', 'search']
@@ -863,7 +863,7 @@ const TOOLDEF = {
   extract: ['extract', 'Extrahieren', 'act'], split: ['split', 'Teilen', 'act'], mergeb: ['merge', 'Anhängen', 'act'],
   formfill: ['form', 'Ausfüllen', 'act'], ftext: ['field', 'Textfeld', 'tool'], fcheck: ['check', 'Kontrollkästchen', 'tool'], flatten: ['flatten', 'Reduzieren', 'act'],
   redact: ['redact', 'Schwärzen', 'tool'], redactsearch: ['search', 'Suchen & schwärzen', 'act'], docprops: ['info', 'Eigenschaften', 'act'], stripmeta: ['clean', 'Metadaten entfernen', 'act'],
-  ocr: ['ocr', 'Durchsuchbar machen', 'act'], selrange: ['range', 'Seiten wählen', 'act'], unprotect: ['unlock', 'Schutz entfernen', 'act'], batch: ['batch', 'Stapel', 'act'], clist: ['note', 'Kommentarliste', 'act'], cdelall: ['trash', 'Alle löschen', 'act'], cflat: ['flatten', 'Kommentare fest', 'act'], encrypt: ['lock', 'Passwort', 'act'], savepdf: ['save', 'Als PDF', 'act'], imgexp: ['imgexp', 'Als Bilder', 'act'], textexp: ['textexp', 'Als Text', 'act'], compress: ['mail', 'Komprimieren & teilen', 'act'],
+  ocr: ['ocr', 'Durchsuchbar machen', 'act'], dupes: ['dupfind', 'Doppelte Seiten', 'act'], selrange: ['range', 'Seiten wählen', 'act'], unprotect: ['unlock', 'Schutz entfernen', 'act'], batch: ['batch', 'Stapel', 'act'], clist: ['note', 'Kommentarliste', 'act'], cdelall: ['trash', 'Alle löschen', 'act'], cflat: ['flatten', 'Kommentare fest', 'act'], encrypt: ['lock', 'Passwort', 'act'], savepdf: ['save', 'Als PDF', 'act'], imgexp: ['imgexp', 'Als Bilder', 'act'], textexp: ['textexp', 'Als Text', 'act'], compress: ['mail', 'Komprimieren & teilen', 'act'],
   imgs2pdf: ['image', 'Bilder → PDF', 'act'], search: ['search', 'Suchen', 'act']
 };
 const TOOL_HINT = {
@@ -898,7 +898,7 @@ function runAction(k) {
     insertfile: () => $('#fileInsert').click(), dup: duplicatePages, reverse: reversePages, extract: extractPages, split: splitDialog, mergeb: () => $('#fileAdd').click(),
     formfill: () => openRight('form'), flatten: flattenForms, redactsearch: () => { openRight('search'); setTimeout(() => $('#q')?.focus(), 30); },
     encrypt: protectDialog, docprops: () => openRight('doc'), stripmeta: stripMeta, savepdf: savePdf, imgexp: imageExportDialog, textexp: exportText, compress: compressSplitDialog,
-    ocr: ocrDialog, selrange: rangeDialog, unprotect: unprotectDialog, batch: batchDialog, clist: () => openRight('comments'), cdelall: deleteAllComments, cflat: () => savePdf({ flatten: true }),
+    ocr: ocrDialog, dupes: dupesDialog, selrange: rangeDialog, unprotect: unprotectDialog, batch: batchDialog, clist: () => openRight('comments'), cdelall: deleteAllComments, cflat: () => savePdf({ flatten: true }),
     imgs2pdf: () => { const f = $('#fileOpen'); f.accept = 'image/*'; f.click(); setTimeout(() => f.accept = 'application/pdf,.pdf,image/*', 500); },
     search: () => { if (!S.pages.length) return toast('Bitte zuerst ein PDF öffnen'); openRight('search'); setTimeout(() => $('#q')?.focus(), 30); }
   };
@@ -2305,6 +2305,132 @@ function panelDoc(b) {
 }
 
 /* ================= Seitenbereich / Passwort entfernen / Stapelverarbeitung ================= */
+/* ================= Doppelte Seiten finden ================= */
+const DUP_LEVELS = { streng: { thr: 10, fine: 0.99, jac: 0.97, label: 'Streng – nur nahezu identische Seiten' }, normal: { thr: 24, fine: 0.97, jac: 0.9, label: 'Normal (empfohlen)' }, tolerant: { thr: 40, fine: 0.93, jac: 0.8, label: 'Großzügig – auch stärker abweichende Scans' } };
+function popcnt32(x) { x -= (x >>> 1) & 0x55555555; x = (x & 0x33333333) + ((x >>> 2) & 0x33333333); return (((x + (x >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24; }
+const hamming = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) d += popcnt32(a[i] ^ b[i]); return d; };
+async function pageFingerprint(p, cv, small) {
+  const box = vbox(p), w0 = box[2] - box[0], h0 = box[3] - box[1]; const sc = 220 / Math.max(w0, h0);
+  const W = Math.max(8, Math.round(w0 * sc)), H = Math.max(8, Math.round(h0 * sc)); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d', { willReadFrequently: true }); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+  const pg = await getPdfPage(p.src, p.idx); const PV = pg.getViewport({ scale: 1 }).constructor;
+  await pg.render({ canvasContext: g, viewport: new PV({ viewBox: box, scale: sc, rotation: 0 }), annotationMode: pdfjsLib.AnnotationMode.ENABLE }).promise;
+  const px = g.getImageData(0, 0, W, H).data; let ink = 0; for (let i = 0; i < px.length; i += 4) if (px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11 < 225) ink++;
+  // grober Fingerabdruck (Vorauswahl)
+  small.width = 17; small.height = 16; const sg = small.getContext('2d', { willReadFrequently: true }); sg.imageSmoothingQuality = 'high'; sg.drawImage(cv, 0, 0, 17, 16);
+  const sp = sg.getImageData(0, 0, 17, 16).data; const lum = (x, y) => { const k = (y * 17 + x) * 4; return sp[k] * 0.3 + sp[k + 1] * 0.59 + sp[k + 2] * 0.11; };
+  const bits = new Uint32Array(8); let n = 0; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++, n++) if (lum(x, y) > lum(x + 1, y) + 1) bits[n >> 5] |= 1 << (n & 31);
+  // feines Graubild (für den genauen Vergleich gescannter Seiten)
+  const fw = 110, fh = Math.max(8, Math.min(220, Math.round(fw * H / W))); small.width = fw; small.height = fh; sg.imageSmoothingQuality = 'high'; sg.drawImage(cv, 0, 0, fw, fh);
+  const fd = sg.getImageData(0, 0, fw, fh).data; const fine = new Float32Array(fw * fh); let mean = 0;
+  for (let i = 0; i < fine.length; i++) { fine[i] = 255 - (fd[i * 4] * 0.3 + fd[i * 4 + 1] * 0.59 + fd[i * 4 + 2] * 0.11); mean += fine[i]; } mean /= fine.length;
+  for (let i = 0; i < fine.length; i++) fine[i] -= mean;
+  const tc = await getText(p); const text = tc.items.map(it => it.str || '').join(' ').replace(/\s+/g, ' ').trim();
+  const ocrText = (p.ocr || []).map(w => w.str).join(' ').replace(/\s+/g, ' ').trim();
+  return { bits, ink: ink / (W * H), text, ocrText, fine, fw, fh, ar: w0 / h0 };
+}
+// normierte Kreuzkorrelation mit kleiner Verschiebungstoleranz (±3 Bildpunkte)
+function fineSim(a, b) {
+  const w = Math.min(a.fw, b.fw), h = Math.min(a.fh, b.fh); let best = -1;
+  for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
+    let sab = 0, saa = 0, sbb = 0;
+    for (let y = 3; y < h - 3; y++) { const ra = y * a.fw, rb = (y + dy) * b.fw; for (let x = 3; x < w - 3; x++) { const va = a.fine[ra + x], vb = b.fine[rb + x + dx]; sab += va * vb; saa += va * va; sbb += vb * vb; } }
+    const c = sab / Math.sqrt(saa * sbb || 1); if (c > best) best = c;
+  }
+  return best;
+}
+function jaccard(a, b) { if (!a.size && !b.size) return 1; let i = 0; for (const x of a) if (b.has(x)) i++; return i / (a.size + b.size - i); }
+const nums = t => (t.match(/\d+(?:[.,:\/-]\d+)*/g) || []).join('|');
+const wordSet = t => new Set(t.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 1));
+async function dupesDialog() {
+  const pages = S.pages.filter(p => p.src); if (pages.length < 2) return toast('Zu wenige Seiten für einen Vergleich');
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem('pw_dupes') || '{}'); } catch { }
+  busy(true, 'Seiten werden vorbereitet …'); let scans = [];
+  for (const p of pages) { const tc = await getText(p); const n = tc.items.reduce((a, it) => a + (it.str || '').trim().length, 0); if (n < 20 && !(p.ocr && p.ocr.length)) scans.push(p); }
+  busy(false);
+  const canOcr = location.protocol !== 'file:'; const mins = Math.max(1, Math.round(scans.length * 3.5 / 60));
+  const r = await dialog('Doppelte Seiten finden', `
+    <div class="hint">Vergleicht alle ${S.pages.length} Seiten. Wiederholte Seiten – z. B. dasselbe Gutachten, das mehrfach als E-Mail-Anhang in der Akte steckt – werden zu Blöcken zusammengefasst. Das <b>erste Vorkommen bleibt</b> immer erhalten; vor dem Löschen siehst du eine Liste und kannst alles prüfen.<br><br><b>Sicherheitsregel:</b> Seiten gelten nur als doppelt, wenn ihr <b>Text übereinstimmt – alle Zahlen exakt</b>. Rechnungen mit anderem Betrag oder Schreiben mit anderem Datum bleiben also erhalten.</div>
+    <div class="fld"><label>Genauigkeit</label><select name="lvl">${Object.entries(DUP_LEVELS).map(([k, v]) => `<option value="${k}" ${k === (saved.lvl || 'normal') ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div>
+    <label style="display:block;color:var(--ink);margin-bottom:6px"><input type="checkbox" name="blank" ${saved.blank !== false ? 'checked' : ''}> Leere Seiten ebenfalls finden</label>
+    ${scans.length ? `<label style="display:block;color:var(--ink)"><input type="checkbox" name="ocr" ${canOcr && (saved.ocr !== false) ? 'checked' : ''} ${canOcr ? '' : 'disabled'}> ${scans.length} gescannte Seite${scans.length > 1 ? 'n' : ''} vorher per Texterkennung lesen <small style="color:var(--muted)">(ca. ${mins} Min.; deutlich zuverlässiger, macht diese Seiten zugleich durchsuchbar)</small></label>
+      <div class="hint" style="margin-top:6px">${canOcr ? 'Ohne Texterkennung werden gescannte Seiten nur nach dem Aussehen verglichen. Solche Treffer werden angezeigt, aber <b>nicht vorausgewählt</b>.' : 'Die Texterkennung ist in dieser Offline-Datei nicht verfügbar. Gescannte Seiten werden nur nach dem Aussehen verglichen; solche Treffer werden angezeigt, aber <b>nicht vorausgewählt</b>.'}</div>` : ''}`,
+    [{ label: 'Abbrechen', value: null }, { label: 'Suchen', value: 'ok', pri: true }]);
+  if (!r) return; const lvl = DUP_LEVELS[r.vals.lvl] ? r.vals.lvl : 'normal'; const L_ = DUP_LEVELS[lvl];
+  try { localStorage.setItem('pw_dupes', JSON.stringify({ lvl, blank: r.vals.blank, ocr: r.vals.ocr })); } catch { }
+  ocrCancel = false; busy(true, 'Seiten werden verglichen …'); $('#busyx').hidden = false; const prog = t => $('#busyt').textContent = t;
+  // 1) gescannte Seiten per Texterkennung lesen
+  if (r.vals.ocr && scans.length && canOcr) {
+    const res = new Map();
+    try { const worker = await getOcrWorker('deu+eng', prog); for (let i = 0; i < scans.length && !ocrCancel; i++) { prog(`Gescannte Seiten werden gelesen … ${i + 1} von ${scans.length}`); res.set(scans[i].id, await ocrPage(scans[i], worker)); } }
+    catch (e) { console.error(e); toast('Texterkennung nicht möglich – Scans werden nur optisch verglichen', 'err', 6000); }
+    if (res.size) { pushUndo(); for (const [id, w] of res) { const p = pageById(id); if (p) p.ocr = w; } linesCache.clear(); }
+    if (ocrCancel) { busy(false); $('#busyx').hidden = true; return toast('Abgebrochen'); }
+  }
+  // 2) Fingerabdrücke
+  const cv = document.createElement('canvas'), small = document.createElement('canvas');
+  const fp = new Map(); let done = 0;
+  try {
+    for (const p of pages) {
+      if (ocrCancel) break; const f = await pageFingerprint(p, cv, small);
+      const t = f.text.length >= 20 ? f.text : f.ocrText; f.kind = f.text.length >= 20 ? 'text' : f.ocrText.length >= 20 ? 'ocr' : 'bild'; f.t = t; f.nums = nums(t); f.words = wordSet(t);
+      fp.set(p.id, f); done++;
+      if (done % 4 === 0) { prog(`Seiten werden verglichen … ${done} von ${pages.length}`); await new Promise(res => setTimeout(res, 0)); }
+    }
+  } catch (e) { console.error(e); toast('Fehler beim Vergleich: ' + e.message, 'err'); }
+  busy(false); $('#busyx').hidden = true; if (ocrCancel && !confirmPartial(done)) return;
+  // 3) Gruppieren: jede Seite wird dem ersten passenden früheren Vorkommen zugeordnet
+  const order = S.pages.filter(p => fp.has(p.id)); const reps = []; const textMap = new Map(); const dupOf = new Map(); const sure = new Map(); const blanks = [];
+  const isBlank = f => f.ink < 0.002 && f.text.length < 3 && f.ocrText.length < 3;
+  const judge = (f, g) => {
+    if (Math.abs(g.ar - f.ar) > 0.03) return 0;
+    if (f.kind === 'text' && g.kind === 'text') return f.t === g.t && (lvl !== 'streng' || hamming(f.bits, g.bits) <= 12) ? 2 : 0;
+    if (f.kind !== 'bild' && g.kind !== 'bild') return f.nums === g.nums && (f.t === g.t || jaccard(f.words, g.words) >= L_.jac) ? 2 : 0;
+    return hamming(f.bits, g.bits) <= L_.thr && fineSim(f, g) >= L_.fine ? 1 : 0; // nur optisch – unsicher
+  };
+  for (const p of order) {
+    const f = fp.get(p.id);
+    if (isBlank(f)) { blanks.push(p); continue; }
+    let match = null, how = 0;
+    if (f.kind === 'text' && textMap.has(f.t)) { const q = textMap.get(f.t); how = judge(f, fp.get(q.id)); if (how) match = q; }
+    if (!match) for (const q of reps) { const h = judge(f, fp.get(q.id)); if (h === 2) { match = q; how = 2; break; } if (h === 1 && !match) { match = q; how = 1; } }
+    if (match) { dupOf.set(p.id, match.id); sure.set(p.id, how === 2); } else { reps.push(p); if (f.kind === 'text') textMap.set(f.t, p); }
+  }
+  // 4) Aufeinanderfolgende Wiederholungen zu Blöcken zusammenfassen
+  const idx = id => S.pages.findIndex(p => p.id === id); const blocks = [];
+  for (const p of S.pages) {
+    if (!dupOf.has(p.id)) continue; const i = idx(p.id), o = idx(dupOf.get(p.id)); const last = blocks[blocks.length - 1]; const su = sure.get(p.id);
+    if (last && last.to === i - 1 && last.oTo === o - 1 && last.sure === su) { last.to = i; last.oTo = o; last.ids.push(p.id); } else blocks.push({ from: i, to: i, oFrom: o, oTo: o, ids: [p.id], sure: su, kind: fp.get(p.id).kind });
+  }
+  showDupes(blocks, r.vals.blank ? blanks : [], done < pages.length);
+}
+function confirmPartial(done) { toast(`Abgebrochen – Ergebnis für die ersten ${done} Seiten`, '', 4000); return done > 1; }
+async function showDupes(blocks, blanks, partial) {
+  const nDup = blocks.reduce((a, b) => a + b.ids.length, 0);
+  if (!nDup && !blanks.length) return dialog('Doppelte Seiten', `<div class="hint">Keine doppelten${blanks.length === 0 ? '' : ' oder leeren'} Seiten gefunden${partial ? ' (Prüfung abgebrochen)' : ''}.</div>`, [{ label: 'OK', value: null, pri: true }]);
+  const rng = (a, b) => a === b ? `Seite ${a + 1}` : `Seiten ${a + 1}–${b + 1}`;
+  const rows = blocks.map((b, k) => `<label class="it" style="cursor:pointer;align-items:center;${b.sure ? '' : 'background:#fff8e6'}"><input type="checkbox" data-blk="${k}" ${b.sure ? 'checked' : ''}><span data-th="${S.pages[b.oFrom].id}" style="width:34px;height:44px;flex:none;background:#f1f3f7;border:1px solid var(--line)"></span><span style="color:var(--muted)">=</span><span data-th="${S.pages[b.from].id}" style="width:34px;height:44px;flex:none;background:#f1f3f7;border:1px solid var(--line)"></span><span class="m"><div><b>${rng(b.from, b.to)}</b> wiederholen ${rng(b.oFrom, b.oTo)}</div><small>${b.ids.length} Seite${b.ids.length > 1 ? 'n' : ''} · ${b.sure ? (b.kind === 'ocr' ? 'Text (Texterkennung) identisch' : 'Text identisch') + (fpPreview(b.oFrom) ? ' · ' + esc(fpPreview(b.oFrom).slice(0, 50)) : '') : '<b style="color:#b26a00">nur optisch ähnlich – bitte ansehen</b>'}</small></span><button class="btn sm" data-go="${b.from}" title="Ansehen">↗</button></label>`).join('')
+    + (blanks.length ? `<h4>Leere Seiten</h4><label class="it" style="cursor:pointer;align-items:center"><input type="checkbox" data-blank checked><span class="m"><div><b>${blanks.length} leere Seite${blanks.length > 1 ? 'n' : ''}</b></div><small>${esc(rangeStr(blanks))}</small></span></label>` : '');
+  let goTo;
+  const unsure = blocks.filter(b => !b.sure).reduce((a, b) => a + b.ids.length, 0);
+  const r = await dialog('Doppelte Seiten gefunden', `<div class="hint"><b>${nDup}</b> doppelte Seite${nDup === 1 ? '' : 'n'} in ${blocks.length} ${blocks.length === 1 ? 'Block' : 'Blöcken'}${unsure ? ` (davon ${unsure} nur optisch ähnlich – gelb markiert und nicht vorausgewählt)` : ''}${blanks.length ? ` und ${blanks.length} leere Seite${blanks.length > 1 ? 'n' : ''}` : ''}${partial ? ' (Prüfung abgebrochen – nicht alle Seiten verglichen)' : ''}. Das erste Vorkommen bleibt jeweils erhalten.</div><div class="list" style="max-height:46vh;overflow:auto">${rows}</div><div class="hint" id="dsum" style="margin-top:8px"></div>`,
+    [{ label: 'Abbrechen', value: null }, { label: 'Nur markieren', value: 'mark' }, { label: 'Markierte löschen', value: 'del', pri: true }], (m, ctx) => {
+      const upd = () => { const ids = selIds(m); $('#dsum', m).textContent = `${ids.length} Seite${ids.length === 1 ? '' : 'n'} ausgewählt – „Nur markieren“ zeigt sie in der Seitenleiste zum Prüfen.`; ctx.ids = ids; };
+      const selIds = m => [...$$('[data-blk]', m).filter(c => c.checked).flatMap(c => blocks[+c.dataset.blk].ids), ...($('[data-blank]', m)?.checked ? blanks.map(p => p.id) : [])];
+      $$('input[type=checkbox]', m).forEach(c => c.onchange = upd); upd();
+      $$('[data-go]', m).forEach(b => b.onclick = e => { e.preventDefault(); goTo = +b.dataset.go; $('.df .btn', m).click(); });
+      $$('[data-th]', m).forEach(el => { const p = pageById(el.dataset.th); if (p?.src) thumbURL(p, 60).then(u => { if (u && el.isConnected) el.innerHTML = `<img src="${u}" style="width:100%;height:100%;object-fit:contain">`; }); });
+      ctx.collect = async () => ({ ids: ctx.ids });
+    });
+  if (!r) { if (goTo !== undefined) { if (S.organize) toggleOrganize(false); scrollToPage(goTo); toast('Seite ' + (goTo + 1) + ' – „Doppelte Seiten“ erneut öffnen, um fortzufahren'); } return; }
+  const ids = new Set(r.extra?.ids || []); if (!ids.size) return toast('Keine Seiten ausgewählt');
+  if (r.v === 'mark') { S.selPages = ids; buildThumbs(); if (!S.organize) toggleOrganize(true); toast(`${ids.size} Seiten markiert – in der Rasteransicht prüfen und dann mit „Löschen“ entfernen`, '', 6000); return; }
+  if (ids.size >= S.pages.length) return toast('Es würden alle Seiten gelöscht – abgebrochen', 'err');
+  pushUndo(); S.pages = S.pages.filter(p => !ids.has(p.id)); S.selPages.clear(); S.sel = null; rebuildAll();
+  toast(`${ids.size} Seite${ids.size === 1 ? '' : 'n'} entfernt – jetzt ${S.pages.length} Seiten. Strg+Z macht es rückgängig.`, '', 6000);
+}
+const fpPreview = i => { const p = S.pages[i]; const s = p?.src && S.sources.get(p.src)?.textCache.get(p.idx); const t = s ? s.items.map(x => x.str).join(' ').replace(/\s+/g, ' ').trim() : ''; return t || (p?.ocr || []).map(w => w.str).join(' ').replace(/\s+/g, ' ').trim(); };
+
 async function rangeDialog() {
   const r = await dialog('Seiten auswählen', `<div class="fld"><label>Seiten</label><input type="text" name="rng" placeholder="z. B. 1-3, 7, 10-" value="${esc(S.selPages.size ? rangeStr(targetPages()) : '')}"></div>
     <div class="hint">Schreibweise: <b>1-3</b> = Seiten 1 bis 3 · <b>7</b> = Seite 7 · <b>10-</b> = ab Seite 10 bis zum Ende. Mehrere Angaben mit Komma trennen. Das Dokument hat ${S.pages.length} Seiten.</div>`,
